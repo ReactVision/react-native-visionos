@@ -4,19 +4,16 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @flow strict
  * @format
  */
 
 'use strict';
 
-// $FlowFixMe[cannot-resolve-module]
-// $FlowFixMe[untyped-import]
 const {defaults} = require('jest-config');
 
 const PODS_LOCATIONS = [
   'packages/rn-tester/Pods',
-  'private/helloworld/ios/Pods',
+  'packages/helloworld/ios/Pods',
 ];
 
 module.exports = {
@@ -42,21 +39,27 @@ module.exports = {
     '<rootDir>/packages/react-native/Libraries/Renderer',
     '<rootDir>/packages/react-native/sdks/hermes/',
     ...PODS_LOCATIONS,
-  ] /*:: as $ReadOnlyArray<string> */,
+  ],
   transformIgnorePatterns: ['node_modules/(?!@react-native/)'],
   haste: {
     defaultPlatform: 'ios',
     platforms: ['ios', 'android'],
   },
-  moduleFileExtensions: [
-    'fb.js',
-    ...defaults.moduleFileExtensions,
-  ] /*:: as $ReadOnlyArray<string> */,
+  moduleNameMapper: {
+    // These mappers allow out-of-tree platforms tests to seamlessly resolve RN imports
+    '^react-native/(.*)': '<rootDir>/packages/react-native/$1',
+    '^react-native$': '<rootDir>/packages/react-native/index.js',
+    // This module is internal to Meta and used by their custom React renderer.
+    // In tests, we can just use a mock.
+    '^ReactNativeInternalFeatureFlags$':
+      '<rootDir>/packages/react-native/jest/ReactNativeInternalFeatureFlagsMock.js',
+  },
+  moduleFileExtensions: ['fb.js'].concat(defaults.moduleFileExtensions),
   modulePathIgnorePatterns: [
     'scripts/.*/__fixtures__/',
     '<rootDir>/packages/react-native/sdks/hermes/',
     ...PODS_LOCATIONS,
-  ] /*:: as $ReadOnlyArray<string> */,
+  ],
   unmockedModulePathPatterns: [
     'node_modules/react/',
     'packages/react-native/Libraries/Renderer',

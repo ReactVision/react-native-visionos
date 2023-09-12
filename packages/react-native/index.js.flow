@@ -401,6 +401,8 @@ export type {
 } from './Libraries/StyleSheet/StyleSheetTypes';
 export type {Insets} from './Libraries/StyleSheet/Rect';
 export {default as StyleSheet} from './Libraries/StyleSheet/StyleSheet';
+export {default as XR} from './Libraries/XR/XR';
+export {default as WindowManager} from './Libraries/WindowManager/WindowManager';
 
 export * as Systrace from './Libraries/Performance/Systrace';
 export {default as ToastAndroid} from './Libraries/Components/ToastAndroid/ToastAndroid';

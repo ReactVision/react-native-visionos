@@ -390,9 +390,14 @@ CGSize RCTScreenSize(void)
 {
   static CGSize portraitSize;
   static dispatch_once_t onceToken;
+
   dispatch_once(&onceToken, ^{
     RCTUnsafeExecuteOnMainQueueSync(^{
+#if TARGET_OS_VISION
+      CGSize screenSize = RCTKeyWindow().bounds.size;
+#else
       CGSize screenSize = [UIScreen mainScreen].bounds.size;
+#endif
       portraitSize = CGSizeMake(MIN(screenSize.width, screenSize.height), MAX(screenSize.width, screenSize.height));
     });
   });
@@ -601,7 +606,17 @@ UIWindow *__nullable RCTKeyWindow(void)
   if (RCTRunningInAppExtension()) {
     return nil;
   }
-
+  
+  id<UIApplicationDelegate> delegate = RCTSharedApplication().delegate;
+  
+  SEL lastFocusedWindowSelector = NSSelectorFromString(@"lastFocusedWindow");
+  if ([delegate respondsToSelector:lastFocusedWindowSelector]) {
+    UIWindow *lastFocusedWindow = [delegate performSelector:lastFocusedWindowSelector];
+    if (lastFocusedWindow) {
+      return lastFocusedWindow;
+    }
+  }
+  
   NSSet<UIScene *> *connectedScenes = RCTSharedApplication().connectedScenes;
 
   UIScene *foregroundActiveScene;
@@ -611,6 +626,14 @@ UIWindow *__nullable RCTKeyWindow(void)
     if (![scene isKindOfClass:[UIWindowScene class]]) {
       continue;
     }
+
+    #if TARGET_OS_VISION
+    /// Presenting scenes over Immersive Spaces leads to crash: "Presentations are not permitted within volumetric window scenes."
+    if (scene.session.role == UISceneSessionRoleImmersiveSpaceApplication) {
+      continue;
+    }
+    
+#endif
 
     if (scene.activationState == UISceneActivationStateForegroundActive) {
       foregroundActiveScene = scene;
@@ -624,15 +647,27 @@ UIWindow *__nullable RCTKeyWindow(void)
   }
 
   UIScene *sceneToUse = foregroundActiveScene ? foregroundActiveScene : foregroundInactiveScene;
+  UIWindowScene *windowScene = (UIWindowScene *)sceneToUse;
 
-  if ([sceneToUse respondsToSelector:@selector(keyWindow)]) {
-    // We have apps internally that might use UIScenes which are not window scenes.
-    // Calling keyWindow on a UIScene which is not a UIWindowScene can cause a crash
-    UIWindowScene *windowScene = (UIWindowScene *)sceneToUse;
+#if TARGET_OS_VISION
+    // Ornaments are supported only on visionOS.
+    // When clicking on an ornament it becomes the keyWindow.
+    // Presenting a RN modal from ornament leads to a crash.
+    UIWindow* keyWindow = windowScene.keyWindow;
+    BOOL isOrnament = [keyWindow.debugDescription containsString:@"Ornament"];
+    if (isOrnament) {
+      for (UIWindow *window in windowScene.windows) {
+        BOOL isOrnament = [window.debugDescription containsString:@"Ornament"];
+        if (window != keyWindow && !isOrnament) {
+          return window;
+        }
+      }
+    }
+    
+    return keyWindow;
+#endif
+
     return windowScene.keyWindow;
-  }
-
-  return nil;
 }
 
 UIStatusBarManager *__nullable RCTUIStatusBarManager(void)

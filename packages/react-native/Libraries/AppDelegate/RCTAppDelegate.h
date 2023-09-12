@@ -65,6 +65,8 @@ __attribute__((deprecated(
 
 /// The window object, used to render the UViewControllers
 @property (nonatomic, strong, nonnull) UIWindow *window;
+/// Store last focused window to properly handle multi-window scenarios
+@property (nonatomic, weak, nullable) UIWindow *lastFocusedWindow;
 
 @property (nonatomic, nullable) RCTBridge *bridge
     __attribute__((deprecated("The bridge is deprecated and will be removed when removing the legacy architecture.")));

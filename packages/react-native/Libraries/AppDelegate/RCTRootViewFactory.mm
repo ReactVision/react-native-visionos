@@ -182,7 +182,11 @@
   RCTSurfaceHostingProxyRootView *surfaceHostingProxyRootView =
       [[RCTSurfaceHostingProxyRootView alloc] initWithSurface:surface];
 
+#if TARGET_OS_VISION
+  surfaceHostingProxyRootView.backgroundColor = [UIColor clearColor];
+#else
   surfaceHostingProxyRootView.backgroundColor = [UIColor systemBackgroundColor];
+#endif
   if (_configuration.customizeRootView != nil) {
     _configuration.customizeRootView(surfaceHostingProxyRootView);
   }
@@ -199,7 +203,13 @@
                            initProps:(NSDictionary *)initProps
 {
   UIView *rootView = RCTAppSetupDefaultRootView(bridge, moduleName, initProps, YES);
+
+#if TARGET_OS_VISION
+  rootView.backgroundColor = [UIColor clearColor];
+#else
   rootView.backgroundColor = [UIColor systemBackgroundColor];
+#endif
+
   return rootView;
 }
 
