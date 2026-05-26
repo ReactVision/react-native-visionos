@@ -379,7 +379,9 @@ static NSSet<NSNumber *> *returnKeyTypesSet;
   _ignoreNextTextInputCall = NO;
   _didMoveToWindow = NO;
   _backedTextInputView.inputAccessoryViewID = nil;
+#if !TARGET_OS_VISION
   _backedTextInputView.inputAccessoryView = nil;
+#endif
   _hasInputAccessoryView = false;
   [_backedTextInputView resignFirstResponder];
 }

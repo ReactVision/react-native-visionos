@@ -383,7 +383,11 @@ CGFloat RCTFontSizeMultiplier(void)
 
 UIDeviceOrientation RCTDeviceOrientation(void)
 {
+#if TARGET_OS_VISION
+  return UIDeviceOrientationPortrait;
+#else
   return [[UIDevice currentDevice] orientation];
+#endif
 }
 
 CGSize RCTScreenSize(void)
@@ -402,11 +406,12 @@ CGSize RCTScreenSize(void)
     });
   });
 
+#if !TARGET_OS_VISION
   if (UIDeviceOrientationIsLandscape(RCTDeviceOrientation())) {
     return CGSizeMake(portraitSize.height, portraitSize.width);
-  } else {
-    return CGSizeMake(portraitSize.width, portraitSize.height);
   }
+#endif
+  return CGSizeMake(portraitSize.width, portraitSize.height);
 }
 
 CGSize RCTViewportSize(void)

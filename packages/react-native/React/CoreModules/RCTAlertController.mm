@@ -38,7 +38,11 @@
     if (scene != nil) {
       _alertWindow = [[UIWindow alloc] initWithWindowScene:scene];
     } else {
+#if TARGET_OS_VISION
+      _alertWindow = [[UIWindow alloc] initWithFrame:CGRectZero];
+#else
       _alertWindow = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
+#endif
     }
 
     if (_alertWindow != nullptr) {
