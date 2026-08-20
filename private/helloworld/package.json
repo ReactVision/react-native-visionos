@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "react": "19.2.3",
-    "react-native": "0.86.2"
+    "@callstack/react-native-visionos": "0.86.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
