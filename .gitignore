@@ -135,6 +135,9 @@ vendor/
 /packages/react-native/.swiftpm
 /packages/react-native/React/includes/
 
+# Tarballs produced by `npm pack` in the visionOS package
+packages/react-native/*.tgz
+
 # @react-native/codegen
 /packages/react-native/React/FBReactNativeSpec/
 /packages/react-native-codegen/lib
