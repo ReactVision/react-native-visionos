@@ -9,6 +9,20 @@
 
 #import <React/RCTAlertController.h>
 
+#if TARGET_OS_VISION
+@interface TransparentViewController : UIViewController
+
+@end
+
+@implementation TransparentViewController
+
+- (UIContainerBackgroundStyle)preferredContainerBackgroundStyle {
+  return UIContainerBackgroundStyleHidden;
+}
+
+@end
+#endif
+
 @interface RCTAlertController ()
 
 @property (nonatomic, strong) UIWindow *alertWindow;
@@ -24,11 +38,19 @@
     if (scene != nil) {
       _alertWindow = [[UIWindow alloc] initWithWindowScene:scene];
     } else {
+#if TARGET_OS_VISION
+      _alertWindow = [[UIWindow alloc] initWithFrame:CGRectZero];
+#else
       _alertWindow = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
+#endif
     }
 
     if (_alertWindow != nullptr) {
+#if TARGET_OS_VISION
+      _alertWindow.rootViewController = [TransparentViewController new];
+#else
       _alertWindow.rootViewController = [UIViewController new];
+#endif
       _alertWindow.windowLevel = UIWindowLevelAlert + 1;
     }
   }
