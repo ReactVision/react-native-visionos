@@ -7,6 +7,7 @@
 
 #import "RCTUtils.h"
 
+#import <atomic>
 #import <dlfcn.h>
 #import <mach/mach_time.h>
 #import <objc/message.h>
@@ -398,34 +399,61 @@ UIDeviceOrientation RCTDeviceOrientation(void)
 }
 #endif
 
+#if TARGET_OS_VISION
+/**
+ * visionOS has no device screen, and the app's window is resized by the user at
+ * any time, so the size cannot be cached for the lifetime of the process the way
+ * it is on iOS. `RCTKeyWindow()` may only be read on the main queue, so refresh
+ * the value whenever we are already there and serve the last known size to the
+ * other queues. Until a window exists there is nothing to report.
+ */
+static CGSize RCTVisionWindowSize(void)
+{
+  static std::atomic<CGSize> lastKnownSize{CGSizeZero};
+
+  if (RCTIsMainQueue()) {
+    CGSize windowSize = RCTKeyWindow().bounds.size;
+    if (!CGSizeEqualToSize(windowSize, CGSizeZero)) {
+      lastKnownSize.store(windowSize, std::memory_order_relaxed);
+    }
+  } else if (CGSizeEqualToSize(lastKnownSize.load(std::memory_order_relaxed), CGSizeZero)) {
+    RCTUnsafeExecuteOnMainQueueSync(^{
+      CGSize windowSize = RCTKeyWindow().bounds.size;
+      if (!CGSizeEqualToSize(windowSize, CGSizeZero)) {
+        lastKnownSize.store(windowSize, std::memory_order_relaxed);
+      }
+    });
+  }
+
+  return lastKnownSize.load(std::memory_order_relaxed);
+}
+#endif
+
 CGSize RCTScreenSize(void)
 {
+#if TARGET_OS_VISION
+  return RCTVisionWindowSize();
+#else
   static CGSize portraitSize;
   static dispatch_once_t onceToken;
-
   dispatch_once(&onceToken, ^{
     RCTUnsafeExecuteOnMainQueueSync(^{
-#if TARGET_OS_VISION
-      CGSize screenSize = RCTKeyWindow().bounds.size;
-#else
       CGSize screenSize = [UIScreen mainScreen].bounds.size;
-#endif
       portraitSize = CGSizeMake(MIN(screenSize.width, screenSize.height), MAX(screenSize.width, screenSize.height));
     });
   });
 
-#if TARGET_OS_TV
-  // tvOS doesn't have device orientation, always return landscape size
-  return CGSizeMake(portraitSize.height, portraitSize.width);
-#elif TARGET_OS_VISION
-  // visionOS windows are resizable and have no device orientation
-  return CGSizeMake(portraitSize.width, portraitSize.height);
-#else
+#if !TARGET_OS_TV
   if (UIDeviceOrientationIsLandscape(RCTDeviceOrientation())) {
     return CGSizeMake(portraitSize.height, portraitSize.width);
+  } else {
+    return CGSizeMake(portraitSize.width, portraitSize.height);
   }
-  return CGSizeMake(portraitSize.width, portraitSize.height);
+#else
+  // tvOS doesn't have device orientation, always return landscape size
+  return CGSizeMake(portraitSize.height, portraitSize.width);
 #endif
+#endif // TARGET_OS_VISION
 }
 
 CGSize RCTViewportSize(void)
