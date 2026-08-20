@@ -35,11 +35,15 @@ def min_ios_version_supported
   return Helpers::Constants.min_ios_version_supported
 end
 
+def min_visionos_version_supported
+  return Helpers::Constants.min_visionos_version_supported
+end
+
 # This function returns the min supported OS versions supported by React Native
 # By using this function, you won't have to manually change your Podfile
 # when we change the minimum version supported by the framework.
 def min_supported_versions
-  return  { :ios => min_ios_version_supported }
+  return  { :ios => min_ios_version_supported, :visionos => min_visionos_version_supported }
 end
 
 # This function prepares the project for React Native, before processing
@@ -169,6 +173,9 @@ def use_react_native! (
   pod 'React-jsi', :path => "#{prefix}/ReactCommon/jsi"
   pod 'RCTSwiftUI', :path => "#{prefix}/ReactApple/RCTSwiftUI"
   pod 'RCTSwiftUIWrapper', :path => "#{prefix}/ReactApple/RCTSwiftUIWrapper"
+  pod 'React-RCTSwiftExtensions', :path => "#{prefix}/Libraries/SwiftExtensions"
+  pod 'React-RCTXR', :path => "#{prefix}/Libraries/XR"
+  pod 'React-RCTWindowManager', :path => "#{prefix}/Libraries/WindowManager", :modular_headers => true
 
   if hermes_enabled
     setup_hermes!(:react_native_path => prefix)
