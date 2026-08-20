@@ -56,9 +56,13 @@ try {
 }
 
 let ios;
+let apple;
 try {
   ios = findCommunityPlatformPackage(
     '@react-native-community/cli-platform-ios',
+  );
+  apple = findCommunityPlatformPackage(
+    '@react-native-community/cli-platform-apple',
   );
 } catch {
   if (verbose) {
@@ -88,7 +92,7 @@ const codegenCommand /*: Command */ = {
     {
       name: '--platform <string>',
       description:
-        'Target platform. Supported values: "android", "ios", "all".',
+        'Target platform. Supported values: "android", "ios", "visionos", "all".',
       default: 'all',
     },
     {
@@ -109,16 +113,27 @@ const codegenCommand /*: Command */ = {
       args.source,
     ),
 };
-
 commands.push(codegenCommand);
 
 const config = {
   commands,
   platforms: {} /*:: as {[string]: Readonly<{
+      npmPackageName?: string,
       projectConfig: unknown,
       dependencyConfig: unknown,
     }>} */,
 };
+
+if (apple != null) {
+  config.commands.push(
+    ...require('./local-cli/localCommands').createCommands(apple),
+  );
+  config.platforms.visionos = {
+    npmPackageName: '@callstack/react-native-visionos',
+    projectConfig: apple.getProjectConfig({platformName: 'visionos'}),
+    dependencyConfig: apple.getDependencyConfig({platformName: 'visionos'}),
+  };
+}
 
 if (ios != null) {
   config.commands.push(...ios.commands);

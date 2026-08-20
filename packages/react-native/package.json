@@ -1,11 +1,11 @@
 {
-  "name": "react-native",
+  "name": "@callstack/react-native-visionos",
   "version": "0.86.2",
-  "description": "A framework for building native apps using React",
+  "description": "React Native for visionOS",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/react/react-native.git",
+    "url": "https://github.com/callstack/react-native-visionos.git",
     "directory": "packages/react-native"
   },
   "homepage": "https://reactnative.dev/",
@@ -137,6 +137,8 @@
     "third-party-podspecs",
     "types",
     "types_generated",
+    "visionos_modules",
+    "local-cli/localCommands.js",
     "!**/__docs__/**",
     "!**/__fixtures__/**",
     "!**/__flowtests__/**",
@@ -224,6 +226,13 @@
         },
         "android": {},
         "jsSrcsDir": "src"
+      },
+      {
+        "name": "FBReactNativeSpec_visionOS",
+        "type": "modules",
+        "ios": {},
+        "android": {},
+        "jsSrcsDir": "visionos_modules"
       }
     ]
   }
