@@ -724,7 +724,11 @@ let targets = [
 
 let package = Package(
   name: react,
-  platforms: [.iOS(.v15), .macCatalyst(SupportedPlatform.MacCatalystVersion.v13)],
+  platforms: [
+    .iOS(.v15),
+    .visionOS(.v1),
+    .macCatalyst(SupportedPlatform.MacCatalystVersion.v13),
+  ],
   products: [
     .library(
       name: react,
