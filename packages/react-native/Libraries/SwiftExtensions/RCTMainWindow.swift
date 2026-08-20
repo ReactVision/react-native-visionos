@@ -1,3 +1,7 @@
+// `openWindow` and `dismissWindow` are iOS 17 / visionOS 1 APIs and this
+// scene only exists on visionOS, so the whole file compiles out elsewhere.
+#if os(visionOS)
+
 import SwiftUI
 
 /**
@@ -133,3 +137,4 @@ public struct WindowHandlingModifier: ViewModifier {
   }
 }
 
+#endif // os(visionOS)

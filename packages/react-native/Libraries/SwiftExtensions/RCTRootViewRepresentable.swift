@@ -1,3 +1,7 @@
+// `UIHostingOrnament`, `UIViewController.ornaments` and
+// `glassBackgroundEffect()` are visionOS-only.
+#if os(visionOS)
+
 import SwiftUI
 import React
 
@@ -71,3 +75,5 @@ struct DevMenuView: View {
     .glassBackgroundEffect()
   }
 }
+
+#endif // os(visionOS)

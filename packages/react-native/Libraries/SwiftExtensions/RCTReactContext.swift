@@ -1,3 +1,7 @@
+// The Observation framework and the `@Observable` macro require
+// iOS 17 / visionOS 1.
+#if os(visionOS)
+
 import SwiftUI
 import Observation
 
@@ -43,3 +47,5 @@ public extension EnvironmentValues {
 private struct RCTSceneContextKey: EnvironmentKey {
   static var defaultValue: RCTReactContext = RCTReactContext()
 }
+
+#endif // os(visionOS)

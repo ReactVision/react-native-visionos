@@ -1,3 +1,7 @@
+// `WindowGroup(id:)` needs iOS 16 and additional scenes only exist on
+// visionOS, so the whole file compiles out elsewhere.
+#if os(visionOS)
+
 import SwiftUI
 import React
 
@@ -95,3 +99,5 @@ extension RCTWindow {
     self.contentView = AnyView(getRootView(sceneData: sceneData))
   }
 }
+
+#endif // os(visionOS)
