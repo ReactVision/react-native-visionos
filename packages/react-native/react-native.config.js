@@ -129,7 +129,7 @@ if (apple != null) {
     ...require('./local-cli/localCommands').createCommands(apple),
   );
   config.platforms.visionos = {
-    npmPackageName: '@callstack/react-native-visionos',
+    npmPackageName: '@reactvision/react-native-visionos',
     projectConfig: apple.getProjectConfig({platformName: 'visionos'}),
     dependencyConfig: apple.getDependencyConfig({platformName: 'visionos'}),
   };

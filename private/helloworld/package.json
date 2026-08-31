@@ -12,8 +12,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "react": "19.2.3",
-    "@callstack/react-native-visionos": "0.86.2"
+    "@reactvision/react-native-visionos": "0.86.2",
+    "react": "19.2.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

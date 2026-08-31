@@ -12,7 +12,7 @@
 
 import type {RNTesterModuleExample} from '../../types/RNTesterTypes';
 
-const {WindowManager, XR} = require('@callstack/react-native-visionos');
+const {WindowManager, XR} = require('@reactvision/react-native-visionos');
 const React = require('react');
 const {Alert, Button, StyleSheet, Text, View} = require('react-native');
 

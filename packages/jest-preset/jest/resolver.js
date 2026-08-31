@@ -24,7 +24,7 @@ module.exports = (path, options) => {
       // mocked by Jest (backwards compatibility around RFC0894)
       if (
         filteredPkg.name === 'react-native' ||
-        filteredPkg.name === '@callstack/react-native-visionos'
+        filteredPkg.name === '@reactvision/react-native-visionos'
       ) {
         delete filteredPkg.exports;
       }

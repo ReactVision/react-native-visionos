@@ -10,7 +10,7 @@
 
 'use strict';
 
-const {WindowManager} = require('@callstack/react-native-visionos');
+const {WindowManager} = require('@reactvision/react-native-visionos');
 const React = require('react');
 const {Button, StyleSheet, Text, View} = require('react-native');
 

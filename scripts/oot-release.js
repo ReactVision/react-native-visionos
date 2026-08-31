@@ -58,7 +58,7 @@ if (require.main === module) {
       alias: 'new-version',
       type: 'string',
       describe:
-        'New version of `@callstack/react-native-visionos` to be released',
+        'New version of `@reactvision/react-native-visionos` to be released',
       required: true,
     })
     .option('r', {

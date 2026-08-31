@@ -1,14 +1,14 @@
 {
-  "name": "@callstack/react-native-visionos",
+  "name": "@reactvision/react-native-visionos",
   "version": "0.86.2",
   "description": "React Native for visionOS",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/callstack/react-native-visionos.git",
+    "url": "https://github.com/ReactVision/react-native-visionos.git",
     "directory": "packages/react-native"
   },
-  "homepage": "https://reactnative.dev/",
+  "homepage": "https://github.com/ReactVision/react-native-visionos#readme",
   "keywords": [
     "react",
     "react-native",
@@ -19,7 +19,7 @@
     "app-framework",
     "mobile-development"
   ],
-  "bugs": "https://github.com/react/react-native/issues",
+  "bugs": "https://github.com/ReactVision/react-native-visionos/issues",
   "engines": {
     "node": "^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0"
   },
