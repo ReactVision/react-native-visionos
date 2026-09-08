@@ -239,8 +239,34 @@ function findExternalLibraries(
     'Searching for codegen-enabled libraries in the project dependencies.',
     true,
   );
+  // This package IS React Native. An out-of-tree platform requires it to be installed alongside
+  // upstream `react-native` — the app still builds iOS and Android from that one — and both declare
+  // the same turbo modules (AccessibilityManager, Appearance, AppState, DeviceInfo,
+  // PlatformConstants, StatusBarManager). Library identity below is the *package* name, so the two
+  // read as different libraries claiming the same modules and the conflict check rejects the pair,
+  // killing `pod install`.
+  //
+  // Upstream's copy is skipped: for this build, React Native is this package. Skipping the scan
+  // altogether would also silence the conflict, and was tried — it loses this package's own
+  // visionOS-only codegen library (FBReactNativeSpec_visionOS), and the build then fails much later
+  // on a missing generated header.
+  const selfPkgName = JSON.parse(
+    fs.readFileSync(
+      path.join(__dirname, '..', '..', '..', 'package.json'),
+      'utf8',
+    ),
+  ).name;
+  const skipUpstreamReactNative =
+    selfPkgName !== 'react-native' && dependencies['react-native'] != null;
+
   // Handle third-party libraries
   return Object.keys(dependencies).flatMap(dependency => {
+    if (skipUpstreamReactNative && dependency === 'react-native') {
+      codegenLog(
+        `Skipping upstream react-native: ${selfPkgName} is React Native for this build.`,
+      );
+      return [];
+    }
     let configFilePath = '';
     try {
       configFilePath = require.resolve(path.join(dependency, 'package.json'), {

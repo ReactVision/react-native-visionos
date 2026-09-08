@@ -40,21 +40,7 @@ def list_native_modules!(config_command)
   packages = config["dependencies"]
   ios_project_root = Pathname.new(config["project"]["ios"]["sourceDir"])
   react_native_path = Pathname.new(config["reactNativePath"])
-  # Written next to the Podfile being installed, not next to `project.ios.sourceDir`.
-  #
-  # The CLI reports `project.ios.sourceDir` as the app's `ios/` folder for any app that has one,
-  # whatever platform this install is for. On an out-of-tree platform the Podfile lives elsewhere —
-  # `visionos/` — and React Native's codegen looks for this file under the directory it is building
-  # from. Writing it to `ios/` therefore left the visionOS build without it, and
-  # `findCodegenEnabledLibraries` fell back to scanning the app's package.json, where `react-native`
-  # and the visionOS fork both declare the same turbo modules. `pod install` then died with
-  # "declared in more than one libraries" for AccessibilityManager, Appearance, AppState,
-  # DeviceInfo, PlatformConstants and StatusBarManager.
-  #
-  # `ios_project_root` is deliberately left alone above: it is also used to make podspec paths
-  # relative, and those are correct as they stand because `ios/` and `visionos/` are siblings.
-  codegen_output_path = Pathname.new(Pod::Config.instance.installation_root.to_s)
-    .join("build/generated/autolinking/autolinking.json")
+  codegen_output_path = ios_project_root.join("build/generated/autolinking/autolinking.json")
 
   # Write autolinking react-native-config output to codegen folder
   FileUtils.mkdir_p(File.dirname(codegen_output_path))
