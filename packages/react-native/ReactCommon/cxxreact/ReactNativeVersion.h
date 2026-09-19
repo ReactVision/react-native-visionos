@@ -14,7 +14,7 @@
 
 #define REACT_NATIVE_VERSION_MAJOR 0
 #define REACT_NATIVE_VERSION_MINOR 86
-#define REACT_NATIVE_VERSION_PATCH 4
+#define REACT_NATIVE_VERSION_PATCH 3
 
 namespace facebook::react {
 
