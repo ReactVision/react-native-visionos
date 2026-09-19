@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.86.4 — 19 September 2026
+
+The visionOS modules this package adds — `React-RCTXR` and `React-RCTWindowManager` — could not be
+installed by an app. Every fix below is about that, and 0.86.4 supersedes 0.86.3, which carries the
+broken podspecs.
+
+### Fixed
+
+- **`pod install` failed on `RCT-Folly`.** Both visionOS podspecs declared `s.dependency "RCT-Folly", folly_version` unconditionally. That pod only exists when React Native is built from source; in prebuilt mode — the default since 0.86 — nothing provides it, and CocoaPods stopped at *"Unable to find a specification for `RCT-Folly`"*. They now resolve third-party dependencies through `add_rn_third_party_dependencies`, like every other podspec in the tree. The dead `Headers/Public/React_Codegen` search path went with it; the pod has been called `ReactCodegen` for several versions.
+- **`FBReactNativeSpec_visionOS` was never generated.** Both modules import that header, and generating it was left to the app — which cannot do it: once autolinking has run, codegen looks only at the autolinked dependencies, and React Native is not one of them. The spec is now generated when this package is packed, the way `FBReactNativeSpec` already was, and ships in `React/FBReactNativeSpec_visionOS/` under its own pod, `React-RCTFBReactNativeSpecVisionOS`, so a Swift target can import it. `React-Core` excludes it, as it already excluded `FBReactNativeSpec` — otherwise it compiles the same sources a second time wherever React Native is built from source, which is every visionOS build.
+- **Prebuilt artifacts were looked up under this package's own version.** React Native publishes the prebuilt Core and Dependencies xcframeworks under *its* release number, and Gradle resolves `com.facebook.react:react-android` the same way, so a patch release of this package that upstream has not made pointed every lookup at a version nobody published. The result was silent: the iOS build fell back to compiling React Native from source, which under `use_frameworks! :linkage => :dynamic` left ~38 core pods dynamic and failed `pod install` on *"transitive dependencies that include statically linked binaries"*, while Gradle simply could not find the artifact. `reactNativeUpstreamVersion` in `package.json` now names the release the artifacts come from, and the reported runtime version stays on that base.
+- **The package went unrecognized when installed under the `react-native` alias.** An app that builds iOS, Android and visionOS from this one package installs it that way, so there is a single copy of React Native and a single set of pods. Codegen's scan treated the `react-native` entry as upstream's copy and skipped it, dropping this package's own codegen libraries; it now compares the name in the `package.json` the entry resolves to.
+
 ## v0.85.2
 
 ### Added
