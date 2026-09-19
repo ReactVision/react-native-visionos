@@ -174,6 +174,7 @@ def use_react_native! (
   pod 'RCTSwiftUI', :path => "#{prefix}/ReactApple/RCTSwiftUI"
   pod 'RCTSwiftUIWrapper', :path => "#{prefix}/ReactApple/RCTSwiftUIWrapper"
   pod 'React-RCTSwiftExtensions', :path => "#{prefix}/Libraries/SwiftExtensions"
+  pod 'React-RCTFBReactNativeSpecVisionOS', :path => "#{prefix}/React", :modular_headers => true
   pod 'React-RCTXR', :path => "#{prefix}/Libraries/XR"
   pod 'React-RCTWindowManager', :path => "#{prefix}/Libraries/WindowManager", :modular_headers => true
 

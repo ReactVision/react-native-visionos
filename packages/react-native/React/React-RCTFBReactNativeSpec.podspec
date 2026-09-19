@@ -76,16 +76,6 @@ Pod::Spec.new do |s|
     ss.dependency "Yoga"
   end
 
-  # The visionOS modules this package adds on top of React Native. Unlike the spec above they are
-  # in no prebuilt artifact, so they always compile from source.
-  s.subspec "visionOS" do |ss|
-    ss.source_files         = "FBReactNativeSpec_visionOS/**/*.{c,h,m,mm,cpp}"
-    ss.header_dir           = "FBReactNativeSpec_visionOS"
-    ss.pod_target_xcconfig  = {
-      "HEADER_SEARCH_PATHS" => "\"$(PODS_TARGET_SRCROOT)/FBReactNativeSpec_visionOS\"",
-    }
-  end
-
   s.script_phases = [
     {
       :name => '[RN]Check FBReactNativeSpec',

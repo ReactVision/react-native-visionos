@@ -37,7 +37,7 @@ Pod::Spec.new do |s|
 
   s.dependency "RCTTypeSafety"
   s.dependency "React-jsi"
-  s.dependency "React-RCTFBReactNativeSpec/visionOS"
+  s.dependency "React-RCTFBReactNativeSpecVisionOS"
   s.dependency "React-Core/RCTXRHeaders"
 
   add_dependency(s, "ReactCodegen", :additional_framework_paths => ["build/generated/ios"])
