@@ -123,11 +123,17 @@ def use_react_native! (
 
   ReactNativePodsUtils.warn_if_not_on_arm64()
 
+  # The prebuilt Core and Dependencies artifacts are published by React Native, under the version
+  # this package is based on. This package releases patch versions of its own on top of that one,
+  # and nothing is published under those — asking Maven for one finds nothing, and the whole build
+  # quietly falls back to compiling React Native from source.
+  artifacts_version = NewArchitectureHelper.extract_react_native_upstream_version(react_native_path) || react_native_version
+
   # Update ReactNativeDependencies so that we can easily switch between source and prebuilt
-  ReactNativeDependenciesUtils.setup_react_native_dependencies(prefix, react_native_version)
+  ReactNativeDependenciesUtils.setup_react_native_dependencies(prefix, artifacts_version)
 
   # Update ReactNativeCoreUtils so that we can easily switch between source and prebuilt
-  ReactNativeCoreUtils.setup_rncore(prefix, react_native_version)
+  ReactNativeCoreUtils.setup_rncore(prefix, artifacts_version)
 
   Pod::UI.puts "Configuring the target with the New Architecture\n"
 

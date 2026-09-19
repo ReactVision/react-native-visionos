@@ -1,6 +1,7 @@
 {
   "name": "@reactvision/react-native-visionos",
   "version": "0.86.4",
+  "reactNativeUpstreamVersion": "0.86.3",
   "description": "React Native for visionOS",
   "license": "MIT",
   "repository": {
