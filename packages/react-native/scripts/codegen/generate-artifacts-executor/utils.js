@@ -225,6 +225,32 @@ function findLibrariesFromReactNativeConfig(
   });
 }
 
+// Reads the `name` declared by the package a dependency resolves to, which is not necessarily the
+// name it is installed under: an alias installs a package under any name the app picks.
+function readPackageNameOf(
+  dependency /*: string */,
+  projectRoot /*: string */,
+) /*: ?string */ {
+  let packageJsonPath;
+  try {
+    packageJsonPath = require.resolve(path.join(dependency, 'package.json'), {
+      paths: [projectRoot],
+    });
+  } catch {
+    packageJsonPath = path.join(
+      projectRoot,
+      'node_modules',
+      dependency,
+      'package.json',
+    );
+  }
+  try {
+    return JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')).name;
+  } catch {
+    return null;
+  }
+}
+
 function findExternalLibraries(
   pkgJson /*: $FlowFixMe */,
   projectRoot /*: string */,
@@ -250,14 +276,25 @@ function findExternalLibraries(
   // altogether would also silence the conflict, and was tried — it loses this package's own
   // visionOS-only codegen library (FBReactNativeSpec_visionOS), and the build then fails much later
   // on a missing generated header.
+  //
+  // An app may also install this package *as* `react-native`, through a dependency alias. There is
+  // then no upstream copy to skip: the `react-native` entry resolves to this very package, and
+  // skipping it drops the visionOS library just the same. So the entry is compared by the name in
+  // the package.json it resolves to, not by the name it is installed under.
   const selfPkgName = JSON.parse(
     fs.readFileSync(
       path.join(__dirname, '..', '..', '..', 'package.json'),
       'utf8',
     ),
   ).name;
+  const resolvedReactNativeName = readPackageNameOf(
+    'react-native',
+    projectRoot,
+  );
   const skipUpstreamReactNative =
-    selfPkgName !== 'react-native' && dependencies['react-native'] != null;
+    selfPkgName !== 'react-native' &&
+    dependencies['react-native'] != null &&
+    resolvedReactNativeName !== selfPkgName;
 
   // Handle third-party libraries
   return Object.keys(dependencies).flatMap(dependency => {
