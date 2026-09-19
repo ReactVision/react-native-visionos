@@ -74,6 +74,8 @@ Pod::Spec.new do |s|
       "React/DevSupport/**/*",
       "React/Fabric/**/*",
       "React/FBReactNativeSpec/**/*",
+      # Generated alongside FBReactNativeSpec and owned by its own pod, the same way.
+      "React/FBReactNativeSpec_visionOS/**/*",
       "React/Tests/**/*",
       "React/Inspector/**/*",
       "React/Runtime/**/*",
