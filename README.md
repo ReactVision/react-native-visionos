@@ -44,8 +44,16 @@ This work stands on two others, and neither is ours:
 | 0.86.x | `@reactvision/react-native-visionos@0.86.x` | ✅ Current |
 | 0.79.6 and earlier | `@callstack/react-native-visionos` | Callstack's releases |
 
-The package version tracks the React Native version it is built from, so `0.86.2` is React Native
-0.86.2 with visionOS support added. Install it *alongside* `react-native`, not instead of it.
+The package version tracks the React Native line it is built from — `0.86.x` is React Native 0.86
+with visionOS support added. Install it *alongside* `react-native`, not instead of it.
+
+The patch numbers are independent, and deliberately so: this package's own fixes ship without waiting
+for an upstream release, so **0.86.4 is built from upstream 0.86.3**. `reactNativeUpstreamVersion` in
+`packages/react-native/package.json` names the release the prebuilt artifacts come from, because the
+Core and Dependencies xcframeworks are fetched from Maven under *that* number and Gradle resolves
+`com.facebook.react:react-android` the same way. Without the split, a patch upstream has not made
+points every lookup at a version nobody published — which fails quietly, by falling back to building
+React Native from source.
 
 ## Installation
 
