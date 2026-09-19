@@ -140,6 +140,7 @@ packages/react-native/*.tgz
 
 # @react-native/codegen
 /packages/react-native/React/FBReactNativeSpec/
+/packages/react-native/React/FBReactNativeSpec_visionOS/
 /packages/react-native-codegen/lib
 /packages/react-native-codegen/tmp/
 /packages/rn-tester/NativeModuleExample/ScreenshotManagerSpec*
