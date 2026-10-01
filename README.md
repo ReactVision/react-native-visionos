@@ -8,10 +8,10 @@
   <a href="https://www.npmjs.com/package/@reactvision/react-native-visionos">
     <img src="https://img.shields.io/npm/v/@reactvision/react-native-visionos" alt="npm version">
   </a>
-  <a href="https://github.com/ReactVision/react-native-visionos/blob/main/LICENSE">
+  <a href="https://github.com/ReactVision/react-native-visionos/blob/0.86-stable/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT licensed">
   </a>
-  <a href="https://discord.gg/yqqEGUjK">
+  <a href="https://discord.gg/A6TaFNqwVc">
     <img src="https://img.shields.io/discord/774471080713781259?label=Discord" alt="Discord">
   </a>
 </p>
@@ -58,10 +58,25 @@ React Native from source.
 ## Installation
 
 ```bash
-npm install @reactvision/react-native-visionos
+npm install --save-dev @reactvision/react-native-visionos \
+  @callstack/out-of-tree-platforms @react-native-community/cli
 ```
 
-Then create the `visionos/` folder once, and build:
+`@callstack/out-of-tree-platforms` is what Metro resolves the `visionos` platform through, and the
+`visionos/` Podfile autolinks through `@react-native-community/cli`.
+
+Then create the `visionos/` folder once — `expo prebuild` does not generate it. It comes from
+[`@reactvision/visionos-template`](https://github.com/ReactVision/visionos-template), a whole
+React Native project of which only the `visionos/` folder is lifted out:
+
+```bash
+npx @react-native-community/cli@latest init MyApp \
+  --template @reactvision/visionos-template \
+  --directory .visionos-template --skip-install
+mv .visionos-template/visionos ./visionos && rm -rf .visionos-template
+```
+
+And build:
 
 ```bash
 npx expo prebuild

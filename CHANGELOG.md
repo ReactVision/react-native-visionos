@@ -15,6 +15,18 @@ broken podspecs.
 - **Prebuilt artifacts were looked up under this package's own version.** React Native publishes the prebuilt Core and Dependencies xcframeworks under *its* release number, and Gradle resolves `com.facebook.react:react-android` the same way, so a patch release of this package that upstream has not made pointed every lookup at a version nobody published. The result was silent: the iOS build fell back to compiling React Native from source, which under `use_frameworks! :linkage => :dynamic` left ~38 core pods dynamic and failed `pod install` on *"transitive dependencies that include statically linked binaries"*, while Gradle simply could not find the artifact. `reactNativeUpstreamVersion` in `package.json` now names the release the artifacts come from, and the reported runtime version stays on that base.
 - **The package went unrecognized when installed under the `react-native` alias.** An app that builds iOS, Android and visionOS from this one package installs it that way, so there is a single copy of React Native and a single set of pods. Codegen's scan treated the `react-native` entry as upstream's copy and skipped it, dropping this package's own codegen libraries; it now compares the name in the `package.json` the entry resolves to.
 
+## v0.86.3 — 8 September 2026
+
+Superseded by 0.86.4, which carries the podspec fixes above.
+
+### Fixed
+
+- **`pod install` died on duplicate turbo modules when installed alongside `react-native`.** Both packages declare the same turbo modules, and codegen identifies a library by package name, so the pair was rejected as duplicates. Codegen now skips upstream `react-native` instead. Published as a patch bump because npm does not accept a republish of 0.86.2.
+
+## v0.86.2 — 8 September 2026
+
+The first release under `@reactvision/react-native-visionos`: React Native 0.86.2 with Callstack's visionOS out-of-tree platform carried forward — the `visionos` platform and its CLI commands, the `XR` and `WindowManager` modules, and the SwiftUI scene helpers. Superseded by 0.86.4.
+
 ## v0.85.2
 
 ### Added
