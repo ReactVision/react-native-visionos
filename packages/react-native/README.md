@@ -11,7 +11,7 @@
   <a href="https://github.com/ReactVision/react-native-visionos/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT licensed">
   </a>
-  <a href="https://discord.gg/yqqEGUjK">
+  <a href="https://discord.gg/A6TaFNqwVc">
     <img src="https://img.shields.io/discord/774471080713781259?label=Discord" alt="Discord">
   </a>
 </p>
