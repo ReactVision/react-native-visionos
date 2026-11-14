@@ -49,4 +49,6 @@
 /// Handles URLs opened while the app is running for scene-based apps. Invoke from your SceneDelegate.
 + (void)scene:(nonnull UIScene *)scene openURLContexts:(nonnull NSSet<UIOpenURLContext *> *)URLContexts;
 
++ (void)onOpenURL:(nonnull NSURL *)url NS_SWIFT_NAME(onOpenURL(url:));
+
 @end

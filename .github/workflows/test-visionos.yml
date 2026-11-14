@@ -1,0 +1,45 @@
+name: Test visionOS
+
+# This workflow belongs to the visionOS fork and is intentionally separate from
+# `test-all.yml`, which is gated on `github.repository == 'react/react-native'`
+# and therefore never runs here. Keeping it apart also means the upstream
+# workflow stays untouched when this fork is synced with a new React Native
+# version.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths-ignore:
+      - "**/*.md"
+      - "**/__docs__/**"
+  push:
+    branches:
+      - main
+      - "*-stable"
+    paths-ignore:
+      - "**/*.md"
+      - "**/__docs__/**"
+
+permissions:
+  contents: read
+
+# The visionOS SDK download alone is several gigabytes, so never keep a
+# superseded run alive.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test_visionos_rntester:
+    runs-on: macos-15-large
+    strategy:
+      fail-fast: false
+      matrix:
+        flavor: [Debug, Release]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Run it
+        uses: ./.github/actions/test-visionos-rntester
+        with:
+          flavor: ${{ matrix.flavor }}

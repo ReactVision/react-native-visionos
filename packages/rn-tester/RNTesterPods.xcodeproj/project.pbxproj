@@ -9,7 +9,9 @@
 /* Begin PBXBuildFile section */
 		0EA618032BE537D3001875EF /* RNTesterBundle.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 0EA618022BE537D3001875EF /* RNTesterBundle.bundle */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		2250472D0A5B7892DD3C42D6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73B4C3B7A214175BBA6E4104 /* Foundation.framework */; };
 		2DDEF0101F84BF7B00DBDF73 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2DDEF00F1F84BF7B00DBDF73 /* Images.xcassets */; };
+		2F002758915AB8ABCE868796 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 87619190292F02A450C4AD5E /* PrivacyInfo.xcprivacy */; };
 		383889DA23A7398900D06C3E /* RCTConvert_UIColorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 383889D923A7398900D06C3E /* RCTConvert_UIColorTests.m */; };
 		3D2AFAF51D646CF80089D1A3 /* legacy_image@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3D2AFAF41D646CF80089D1A3 /* legacy_image@2x.png */; };
 		3F4D148C63BBF774A25488A6 /* libPods-RNTesterIntegrationTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 93A243F0D4D5C54911E811C4 /* libPods-RNTesterIntegrationTests.a */; };
@@ -174,6 +176,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		85BB1F77B045FCC35FB2D688 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2250472D0A5B7892DD3C42D6 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E7DB209C22B2BA84005AC45F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -265,6 +275,7 @@
 				4C706D402EE4AF9BE838CBA9 /* libPods-RNTester.a */,
 				93A243F0D4D5C54911E811C4 /* libPods-RNTesterIntegrationTests.a */,
 				2B312B0EEE90BA411618B015 /* libPods-RNTesterUnitTests.a */,
+				A49D0488E653750509FEC6AB /* iOS */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -286,6 +297,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2DE7E7D81FB2A4F3009E225D /* Frameworks */,
 				E23BD6487B06BD71F1A86914 /* Pods */,
+				A5953AD90A52180FD742A374 /* RNTester-visionOS */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -298,8 +310,31 @@
 				13B07F961A680F5B00A75B9A /* RNTester.app */,
 				E7DB209F22B2BA84005AC45F /* RNTesterUnitTests.xctest */,
 				E7DB215322B2F332005AC45F /* RNTesterIntegrationTests.xctest */,
+				6CF582849A4FB9165DFD7759 /* RNTester-visionOS.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		A49D0488E653750509FEC6AB /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				73B4C3B7A214175BBA6E4104 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		A5953AD90A52180FD742A374 /* RNTester-visionOS */ = {
+			isa = PBXGroup;
+			children = (
+				EE1AEC4D2B1DE75D5007D1F0 /* Preview Content */,
+				549DEE45F96326E652D7607C /* App.swift */,
+				EF244C92332FE573F70117CE /* AppDelegate.swift */,
+				4BC5E860EFF2E6B2F01F54E9 /* Assets.xcassets */,
+				87619190292F02A450C4AD5E /* PrivacyInfo.xcprivacy */,
+				841F294F87E2B47FF9C60352 /* Info.plist */,
+			);
+			name = "RNTester-visionOS";
+			path = "RNTester-visionOS";
 			sourceTree = "<group>";
 		};
 		E23BD6487B06BD71F1A86914 /* Pods */ = {
@@ -364,9 +399,36 @@
 			path = RNTesterIntegrationTests;
 			sourceTree = "<group>";
 		};
+		EE1AEC4D2B1DE75D5007D1F0 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				CAD8E9A93A294D3C07F5E9A0 /* Preview Assets.xcassets */,
+			);
+			name = "Preview Content";
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		0909BD308DCA902315243616 /* RNTester-visionOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 02D41C4A602226B11590E91A /* Build configuration list for PBXNativeTarget "RNTester-visionOS" */;
+			buildPhases = (
+				8A3B23CE5E6CAD6C75B6E60F /* Sources */,
+				85BB1F77B045FCC35FB2D688 /* Frameworks */,
+				63F5F295879AE94CCD17316A /* Resources */,
+				E91DDFC2D8D7315394835DAE /* Build JS Bundle */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "RNTester-visionOS";
+			productName = "RNTester-visionOS";
+			productReference = 6CF582849A4FB9165DFD7759 /* RNTester-visionOS.app */;
+			productType = "com.apple.product-type.application";
+		};
 		13B07F861A680F5B00A75B9A /* RNTester */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "RNTester" */;
@@ -468,6 +530,7 @@
 				13B07F861A680F5B00A75B9A /* RNTester */,
 				E7DB209E22B2BA84005AC45F /* RNTesterUnitTests */,
 				E7DB215222B2F332005AC45F /* RNTesterIntegrationTests */,
+				0909BD308DCA902315243616 /* RNTester-visionOS */,
 			);
 		};
 /* End PBXProject section */
@@ -482,6 +545,16 @@
 				0EA618032BE537D3001875EF /* RNTesterBundle.bundle in Resources */,
 				F0D621C32BBB9E38005960AC /* PrivacyInfo.xcprivacy in Resources */,
 				3D2AFAF51D646CF80089D1A3 /* legacy_image@2x.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		63F5F295879AE94CCD17316A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E4A52A9DC62785C6F1DA0E7B /* Assets.xcassets in Resources */,
+				89BB46B746F7E5CB3C85D5C3 /* Preview Assets.xcassets in Resources */,
+				2F002758915AB8ABCE868796 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -686,6 +759,26 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-RNTester/Pods-RNTester-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		E91DDFC2D8D7315394835DAE /* Build JS Bundle */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/.xcode.env.local",
+				"$(SRCROOT)/.xcode.env",
+			);
+			name = "Build JS Bundle";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\n\nexport PROJECT_ROOT=\"$SRCROOT\"\nexport ENTRY_FILE=\"$SRCROOT/js/RNTesterApp.ios.js\"\nexport SOURCEMAP_FILE=../sourcemap.ios.map\n\nWITH_ENVIRONMENT=\"../react-native/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"../react-native/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
+		};
 		F28F13DD10D40D98C0BB7BE8 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -742,6 +835,15 @@
 				832F45BB2A8A6E1F0097B4E6 /* SwiftTest.swift in Sources */,
 				5C60EB1C226440DB0018C04F /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8A3B23CE5E6CAD6C75B6E60F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D653D5A53F3446EEFD8CF743 /* App.swift in Sources */,
+				FC4817D2CB8496442823884A /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1075,6 +1177,85 @@
 			};
 			name = Release;
 		};
+		A1F4BC857480692570B8A690 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_ASSET_PATHS = "\"RNTester-visionOS/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "$(TARGET_NAME)/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					/usr/lib/swift,
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.meta.RNTester.localDevelopment.RNTester-visionOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "xros xrsimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+			};
+			name = Debug;
+		};
+		E235EC3066C72A9A3FEDCA8B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_ASSET_PATHS = "\"RNTester-visionOS/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "$(TARGET_NAME)/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					/usr/lib/swift,
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.meta.RNTester.localDevelopment.RNTester-visionOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "xros xrsimulator";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+			};
+			name = Release;
+		};
 		E7DB20A722B2BA84005AC45F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D134EB89DD98253FCF879A47 /* Pods-RNTesterUnitTests.debug.xcconfig */;
@@ -1228,6 +1409,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		02D41C4A602226B11590E91A /* Build configuration list for PBXNativeTarget "RNTester-visionOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E235EC3066C72A9A3FEDCA8B /* Release */,
+				A1F4BC857480692570B8A690 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "RNTester" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
