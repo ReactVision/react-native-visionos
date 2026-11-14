@@ -12,6 +12,7 @@ import '@react-native/fantom/src/setUpDefaultReactNativeEnvironment';
 
 import type {HostInstance} from 'react-native';
 import type IntersectionObserverType from 'react-native/src/private/webapis/intersectionobserver/IntersectionObserver';
+import type IntersectionObserverEntryType from 'react-native/src/private/webapis/intersectionobserver/IntersectionObserverEntry';
 
 import ensureInstance from '../../../__tests__/utilities/ensureInstance';
 import {createShadowNodeReferenceCountingRef} from '../../../__tests__/utilities/ShadowNodeReferenceCounter';
@@ -22,9 +23,9 @@ import {ScrollView, View} from 'react-native';
 import setUpIntersectionObserver from 'react-native/src/private/setup/setUpIntersectionObserver';
 import ReactNativeElement from 'react-native/src/private/webapis/dom/nodes/ReactNativeElement';
 import DOMRectReadOnly from 'react-native/src/private/webapis/geometry/DOMRectReadOnly';
-import IntersectionObserverEntry from 'react-native/src/private/webapis/intersectionobserver/IntersectionObserverEntry';
 
 declare const IntersectionObserver: Class<IntersectionObserverType>;
+declare const IntersectionObserverEntry: Class<IntersectionObserverEntryType>;
 
 setUpIntersectionObserver();
 
@@ -37,14 +38,12 @@ export function expectRectEquals(
   expected: {x: number, y: number, width: number, height: number},
 ): boolean {
   const {x, y, width, height} = expected;
-  if (
-    !(
-      rect.x === x &&
-      rect.y === y &&
-      rect.width === width &&
-      rect.height === height
-    )
-  ) {
+  if (!(
+    rect.x === x &&
+    rect.y === y &&
+    rect.width === width &&
+    rect.height === height
+  )) {
     const received = {
       x: rect.x,
       y: rect.y,
@@ -322,6 +321,10 @@ describe('IntersectionObserver', () => {
       expect(
         new IntersectionObserver(() => {}, {threshold: [0.5, 0, 1]}).thresholds,
       ).toEqual([0, 0.5, 1]);
+      expect(
+        new IntersectionObserver(() => {}, {threshold: [0.000001, 1e-7]})
+          .thresholds,
+      ).toEqual([1e-7, 0.000001]);
 
       // Does NOT deduplicate (browsers don't do it - shrug)
       expect(
@@ -428,6 +431,11 @@ describe('IntersectionObserver', () => {
         new IntersectionObserver(() => {}, {rnRootThreshold: [0.5, 0, 1]})
           .rnRootThresholds,
       ).toEqual([0, 0.5, 1]);
+      expect(
+        new IntersectionObserver(() => {}, {
+          rnRootThreshold: [0.000001, 1e-7],
+        }).rnRootThresholds,
+      ).toEqual([1e-7, 0.000001]);
 
       // Does NOT deduplicate (browsers don't do it - shrug)
       expect(
@@ -4275,6 +4283,20 @@ describe('IntersectionObserver', () => {
           expect(intersectionObserverCallback).toHaveBeenCalledTimes(0);
         });
       });
+    });
+  });
+
+  describe('IntersectionObserverEntry global constructor', () => {
+    it('throws when called', () => {
+      expect(
+        () =>
+          // The public stub throws regardless of arguments; the real class
+          // requires two so Flow needs a suppression here.
+          // $FlowExpectedError[incompatible-type]
+          new IntersectionObserverEntry(),
+      ).toThrow(
+        "Failed to construct 'IntersectionObserverEntry': Illegal constructor",
+      );
     });
   });
 });

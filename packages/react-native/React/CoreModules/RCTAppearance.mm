@@ -69,8 +69,7 @@ NSString *RCTColorSchemePreference(UITraitCollection *traitCollection)
   UIUserInterfaceStyle systemStyle = sUseKeyWindowForSystemStyle ? RCTKeyWindow().traitCollection.userInterfaceStyle
                                                                  : traitCollection.userInterfaceStyle;
 
-  // Fallback to dark mode on visionOS
-  return appearances[@(systemStyle)] ?: RCTAppearanceColorSchemeDark;
+  return appearances[@(systemStyle)] ?: RCTAppearanceColorSchemeLight;
 }
 
 @interface RCTAppearance () <NativeAppearanceSpec>
@@ -110,11 +109,14 @@ RCT_EXPORT_MODULE(Appearance)
   return std::make_shared<NativeAppearanceSpecJSI>(params);
 }
 
-RCT_EXPORT_METHOD(setColorScheme : (NSString *)style)
+- (void)setColorScheme:(NSString *)style
 {
   UIUserInterfaceStyle userInterfaceStyle = [RCTConvert UIUserInterfaceStyle:style];
   NSMutableArray<UIWindow *> *windows = [NSMutableArray new];
   for (UIWindowScene *scene in RCTSharedApplication().connectedScenes) {
+    if (![scene respondsToSelector:@selector(windows)]) {
+      continue;
+    }
     [windows addObjectsFromArray:scene.windows];
   }
 

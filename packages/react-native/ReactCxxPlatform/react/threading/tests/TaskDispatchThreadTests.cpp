@@ -9,6 +9,7 @@
 #include <react/threading/TaskDispatchThread.h>
 #include <atomic>
 #include <chrono>
+#include <future>
 #include <thread>
 
 namespace facebook::react {
@@ -52,21 +53,41 @@ TEST_F(TaskDispatchThreadTest, RunSyncExecutesTask) {
 // Test: runAsync with delay
 TEST_F(TaskDispatchThreadTest, RunAsyncWithDelay) {
   std::atomic<int> counter{0};
-  dispatcher->runAsync([&] { counter++; }, std::chrono::milliseconds(100));
-  std::this_thread::sleep_for(std::chrono::milliseconds(50));
-  EXPECT_EQ(counter.load(), 0); // Not yet executed
-  std::this_thread::sleep_for(std::chrono::milliseconds(70));
-  EXPECT_EQ(counter.load(), 1); // Should be executed now
+  std::promise<void> taskDone;
+  auto future = taskDone.get_future();
+  dispatcher->runAsync(
+      [&] {
+        counter++;
+        taskDone.set_value();
+      },
+      std::chrono::milliseconds(200));
+  std::this_thread::sleep_for(std::chrono::milliseconds(20));
+  EXPECT_EQ(counter.load(), 0); // 20ms << 200ms, not yet executed
+  ASSERT_EQ(
+      future.wait_for(std::chrono::seconds(5)), std::future_status::ready);
+  EXPECT_EQ(counter.load(), 1); // Task completed
 }
 
 // Test: Multiple delayed tasks execute in order
 TEST_F(TaskDispatchThreadTest, MultipleDelayedTasksOrder) {
   std::vector<int> results;
+  std::promise<void> secondTaskDone;
+  auto future = secondTaskDone.get_future();
   dispatcher->runAsync(
       [&] { results.push_back(1); }, std::chrono::milliseconds(50));
   dispatcher->runAsync(
-      [&] { results.push_back(2); }, std::chrono::milliseconds(100));
-  std::this_thread::sleep_for(std::chrono::milliseconds(120));
+      [&] {
+        results.push_back(2);
+        secondTaskDone.set_value();
+      },
+      std::chrono::milliseconds(100));
+  // Block until the later task has actually run rather than racing a fixed
+  // sleep against the 100ms deadline. Both tasks run serially on the single
+  // dispatch thread in deadline order, so once the 100ms task completes the
+  // 50ms task is guaranteed to have already run; waiting on the future also
+  // establishes the happens-before needed to read `results` safely.
+  ASSERT_EQ(
+      future.wait_for(std::chrono::seconds(5)), std::future_status::ready);
   ASSERT_EQ(results.size(), 2);
   EXPECT_EQ(results[0], 1);
   EXPECT_EQ(results[1], 2);

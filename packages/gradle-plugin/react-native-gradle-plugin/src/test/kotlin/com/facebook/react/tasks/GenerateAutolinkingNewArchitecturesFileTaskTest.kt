@@ -13,6 +13,7 @@ import com.facebook.react.model.ModelAutolinkingDependenciesPlatformAndroidJson
 import com.facebook.react.model.ModelAutolinkingDependenciesPlatformJson
 import com.facebook.react.tasks.GenerateAutolinkingNewArchitecturesFileTask.Companion.sanitizeCmakeListsPath
 import com.facebook.react.tests.createTestTask
+import java.io.File
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -41,6 +42,7 @@ class GenerateAutolinkingNewArchitecturesFileTaskTest {
 
     assertThat(task.generatedOutputDirectory.get().asFile).isEqualTo(outputFolder)
     assertThat(task.generatedOutputDirectory.get().asFile).isEqualTo(outputFolder)
+    assertThat(task.generatedPureCxxSourceDirectory.isPresent).isFalse()
   }
 
   @Test
@@ -72,10 +74,10 @@ class GenerateAutolinkingNewArchitecturesFileTaskTest {
                                 name = "a-dependency",
                                 platforms =
                                     ModelAutolinkingDependenciesPlatformJson(android = null),
-                            )
+                            ),
                     ),
                 project = null,
-            )
+            ),
         )
     assertThat(result).isEmpty()
   }
@@ -83,13 +85,12 @@ class GenerateAutolinkingNewArchitecturesFileTaskTest {
   @Test
   fun filterAndroidPackages_withValidAndroidObject_returnsIt() {
     val task = createTestTask<GenerateAutolinkingNewArchitecturesFileTask>()
-    val android =
-        ModelAutolinkingDependenciesPlatformAndroidJson(
-            sourceDir = "./a/directory/android",
-            packageImportPath = "import com.facebook.react.aPackage;",
-            packageInstance = "new APackage()",
-            buildTypes = emptyList(),
-        )
+    val android = ModelAutolinkingDependenciesPlatformAndroidJson(
+        sourceDir = "./a/directory/android",
+        packageImportPath = "import com.facebook.react.aPackage;",
+        packageInstance = "new APackage()",
+        buildTypes = emptyList(),
+    )
 
     val result =
         task.filterAndroidPackages(
@@ -103,12 +104,85 @@ class GenerateAutolinkingNewArchitecturesFileTaskTest {
                                 name = "a-dependency",
                                 platforms =
                                     ModelAutolinkingDependenciesPlatformJson(android = android),
-                            )
+                            ),
                     ),
                 project = null,
-            )
+            ),
         )
     assertThat(result).containsExactly(android)
+  }
+
+  @Test
+  fun cmakeListsPathForDependency_withCmakeListsPath_returnsIt() {
+    val task = createTestTask<GenerateAutolinkingNewArchitecturesFileTask>()
+    val dependency = ModelAutolinkingDependenciesPlatformAndroidJson(
+        sourceDir = "./a/directory",
+        packageImportPath = "import com.facebook.react.aPackage;",
+        packageInstance = "new APackage()",
+        buildTypes = emptyList(),
+        libraryName = "aPackage",
+        cmakeListsPath = "./a/directory/CMakeLists.txt",
+        isPureCxxDependency = true,
+    )
+
+    assertThat(task.cmakeListsPathForDependency(dependency))
+        .isEqualTo("./a/directory/CMakeLists.txt")
+  }
+
+  @Test
+  fun cmakeListsPathForDependency_withPureCxxDependency_returnsGeneratedPath() {
+    val generatedPureCxxSourceDirectory = tempFolder.newFolder("pureCxx")
+    val task =
+        createTestTask<GenerateAutolinkingNewArchitecturesFileTask> {
+          it.generatedPureCxxSourceDirectory.set(generatedPureCxxSourceDirectory)
+        }
+    val dependency = ModelAutolinkingDependenciesPlatformAndroidJson(
+        sourceDir = "./a/directory",
+        packageImportPath = "import com.facebook.react.aPackage;",
+        packageInstance = "new APackage()",
+        buildTypes = emptyList(),
+        libraryName = "aPackage",
+        isPureCxxDependency = true,
+    )
+
+    assertThat(task.cmakeListsPathForDependency(dependency))
+        .isEqualTo(
+            File(generatedPureCxxSourceDirectory, "aPackage/jni/CMakeLists.txt").absolutePath,
+        )
+  }
+
+  @Test
+  fun cmakeListsPathForDependency_withMissingGeneratedDirectory_returnsNull() {
+    val task = createTestTask<GenerateAutolinkingNewArchitecturesFileTask>()
+    val dependency = ModelAutolinkingDependenciesPlatformAndroidJson(
+        sourceDir = "./a/directory",
+        packageImportPath = "import com.facebook.react.aPackage;",
+        packageInstance = "new APackage()",
+        buildTypes = emptyList(),
+        libraryName = "aPackage",
+        isPureCxxDependency = true,
+    )
+
+    assertThat(task.cmakeListsPathForDependency(dependency)).isNull()
+  }
+
+  @Test
+  fun cmakeListsPathForDependency_withNonPureCxxDependency_returnsNull() {
+    val generatedPureCxxSourceDirectory = tempFolder.newFolder("pureCxx")
+    val task =
+        createTestTask<GenerateAutolinkingNewArchitecturesFileTask> {
+          it.generatedPureCxxSourceDirectory.set(generatedPureCxxSourceDirectory)
+        }
+    val dependency = ModelAutolinkingDependenciesPlatformAndroidJson(
+        sourceDir = "./a/directory",
+        packageImportPath = "import com.facebook.react.aPackage;",
+        packageInstance = "new APackage()",
+        buildTypes = emptyList(),
+        libraryName = "aPackage",
+        isPureCxxDependency = false,
+    )
+
+    assertThat(task.cmakeListsPathForDependency(dependency)).isNull()
   }
 
   @Test
@@ -128,13 +202,11 @@ class GenerateAutolinkingNewArchitecturesFileTaskTest {
             # or link against a old prefab target (this is needed for React Native 0.76 on).
             set(REACTNATIVE_MERGED_SO true)
 
+            set(AUTOLINKED_LIBRARIES)
 
 
-            set(AUTOLINKED_LIBRARIES
-              
-            )
             """
-                .trimIndent()
+                .trimIndent(),
         )
   }
 
@@ -155,18 +227,155 @@ class GenerateAutolinkingNewArchitecturesFileTaskTest {
             # or link against a old prefab target (this is needed for React Native 0.76 on).
             set(REACTNATIVE_MERGED_SO true)
 
-            add_subdirectory("./a/directory/" aPackage_autolinked_build)
-            add_subdirectory("./another/directory/with\ spaces/" anotherPackage_autolinked_build)
-            add_subdirectory("./another/directory/cxx/" anotherPackage_cxxmodule_autolinked_build)
+            set(AUTOLINKED_LIBRARIES)
 
-            set(AUTOLINKED_LIBRARIES
-              react_codegen_aPackage
-              react_codegen_anotherPackage
-            another_cxxModule
-            )
+            if(EXISTS "./a/directory/")
+              add_subdirectory("./a/directory/" aPackage_autolinked_build)
+              list(APPEND AUTOLINKED_LIBRARIES react_codegen_aPackage)
+            else()
+              message(WARNING "React Native: Skipping autolinked library 'react_codegen_aPackage' because the source directory does not exist: ./a/directory/")
+            endif()
+            if(EXISTS "./another/directory/with\ spaces/")
+              add_subdirectory("./another/directory/with\ spaces/" anotherPackage_autolinked_build)
+              list(APPEND AUTOLINKED_LIBRARIES react_codegen_anotherPackage)
+            else()
+              message(WARNING "React Native: Skipping autolinked library 'react_codegen_anotherPackage' because the source directory does not exist: ./another/directory/with\ spaces/")
+            endif()
+            if(EXISTS "./another/directory/cxx/")
+              add_subdirectory("./another/directory/cxx/" anotherPackage_cxxmodule_autolinked_build)
+              list(APPEND AUTOLINKED_LIBRARIES another_cxxModule)
+            else()
+              message(WARNING "React Native: Skipping autolinked C++ module 'another_cxxModule' because the source directory does not exist: ./another/directory/cxx/")
+            endif()
             """
-                .trimIndent()
+                .trimIndent(),
         )
+  }
+
+  @Test
+  fun generateCmakeFileContent_withGeneratedPureCxxPath_usesItWhenCmakeListsPathIsMissing() {
+    val generatedPureCxxSourceDirectory = tempFolder.newFolder("pureCxx")
+    val generatedCmakeListsPath =
+        File(generatedPureCxxSourceDirectory, "aPackage/jni/CMakeLists.txt").absolutePath
+    val generatedNativeFolderPath = sanitizeCmakeListsPath(generatedCmakeListsPath)
+
+    val task =
+        createTestTask<GenerateAutolinkingNewArchitecturesFileTask> {
+          it.generatedPureCxxSourceDirectory.set(generatedPureCxxSourceDirectory)
+        }
+
+    val output =
+        task.generateCmakeFileContent(
+            listOf(
+                ModelAutolinkingDependenciesPlatformAndroidJson(
+                    sourceDir = "./a/directory",
+                    packageImportPath = "import com.facebook.react.aPackage;",
+                    packageInstance = "new APackage()",
+                    buildTypes = emptyList(),
+                    libraryName = "aPackage",
+                    isPureCxxDependency = true,
+                ),
+            ),
+        )
+
+    assertThat(output)
+        .contains(
+            """
+            if(EXISTS "$generatedNativeFolderPath")
+              add_subdirectory("$generatedNativeFolderPath" aPackage_autolinked_build)
+              list(APPEND AUTOLINKED_LIBRARIES react_codegen_aPackage)
+            else()
+              message(WARNING "React Native: Skipping autolinked library 'react_codegen_aPackage' because the source directory does not exist: $generatedNativeFolderPath")
+            endif()
+            """
+                .trimIndent(),
+        )
+  }
+
+  @Test
+  fun generateCmakeFileContent_withGeneratedPureCxxPath_preservesCmakeListsPath() {
+    val generatedPureCxxSourceDirectory = tempFolder.newFolder("pureCxx")
+
+    val task =
+        createTestTask<GenerateAutolinkingNewArchitecturesFileTask> {
+          it.generatedPureCxxSourceDirectory.set(generatedPureCxxSourceDirectory)
+        }
+
+    val output =
+        task.generateCmakeFileContent(
+            listOf(
+                ModelAutolinkingDependenciesPlatformAndroidJson(
+                    sourceDir = "./a/directory",
+                    packageImportPath = "import com.facebook.react.aPackage;",
+                    packageInstance = "new APackage()",
+                    buildTypes = emptyList(),
+                    libraryName = "aPackage",
+                    cmakeListsPath = "./a/directory/CMakeLists.txt",
+                    isPureCxxDependency = true,
+                ),
+            ),
+        )
+
+    assertThat(output)
+        .contains(
+            """
+            if(EXISTS "./a/directory/")
+              add_subdirectory("./a/directory/" aPackage_autolinked_build)
+              list(APPEND AUTOLINKED_LIBRARIES react_codegen_aPackage)
+            else()
+              message(WARNING "React Native: Skipping autolinked library 'react_codegen_aPackage' because the source directory does not exist: ./a/directory/")
+            endif()
+            """
+                .trimIndent(),
+        )
+    assertThat(output).doesNotContain(generatedPureCxxSourceDirectory.absolutePath)
+  }
+
+  @Test
+  fun generateCmakeFileContent_withGeneratedPureCxxPath_ignoresNonPureCxxDependency() {
+    val generatedPureCxxSourceDirectory = tempFolder.newFolder("pureCxx")
+
+    val task =
+        createTestTask<GenerateAutolinkingNewArchitecturesFileTask> {
+          it.generatedPureCxxSourceDirectory.set(generatedPureCxxSourceDirectory)
+        }
+
+    val output =
+        task.generateCmakeFileContent(
+            listOf(
+                ModelAutolinkingDependenciesPlatformAndroidJson(
+                    sourceDir = "./a/directory",
+                    packageImportPath = "import com.facebook.react.aPackage;",
+                    packageInstance = "new APackage()",
+                    buildTypes = emptyList(),
+                    libraryName = "aPackage",
+                    isPureCxxDependency = false,
+                ),
+            ),
+        )
+
+    assertThat(output).doesNotContain("aPackage_autolinked_build")
+    assertThat(output).doesNotContain(generatedPureCxxSourceDirectory.absolutePath)
+  }
+
+  @Test
+  fun generateCmakeFileContent_withPureCxxDependencyAndMissingGeneratedDirectory_skipsIt() {
+    val output =
+        createTestTask<GenerateAutolinkingNewArchitecturesFileTask>()
+            .generateCmakeFileContent(
+                listOf(
+                    ModelAutolinkingDependenciesPlatformAndroidJson(
+                        sourceDir = "./a/directory",
+                        packageImportPath = "import com.facebook.react.aPackage;",
+                        packageInstance = "new APackage()",
+                        buildTypes = emptyList(),
+                        libraryName = "aPackage",
+                        isPureCxxDependency = true,
+                    ),
+                ),
+            )
+
+    assertThat(output).doesNotContain("aPackage_autolinked_build")
   }
 
   @Test
@@ -210,7 +419,7 @@ class GenerateAutolinkingNewArchitecturesFileTaskTest {
             } // namespace react
             } // namespace facebook
             """
-                .trimIndent()
+                .trimIndent(),
         )
   }
 
@@ -267,7 +476,7 @@ class GenerateAutolinkingNewArchitecturesFileTaskTest {
             } // namespace react
             } // namespace facebook
             """
-                .trimIndent()
+                .trimIndent(),
         )
   }
 
@@ -289,28 +498,27 @@ class GenerateAutolinkingNewArchitecturesFileTaskTest {
     assertThat(sanitizeCmakeListsPath(input)).isEqualTo("./a/dir\\ ectory/")
   }
 
-  private val testDependencies =
-      listOf(
-          ModelAutolinkingDependenciesPlatformAndroidJson(
-              sourceDir = "./a/directory",
-              packageImportPath = "import com.facebook.react.aPackage;",
-              packageInstance = "new APackage()",
-              buildTypes = emptyList(),
-              libraryName = "aPackage",
-              componentDescriptors = emptyList(),
-              cmakeListsPath = "./a/directory/CMakeLists.txt",
-          ),
-          ModelAutolinkingDependenciesPlatformAndroidJson(
-              sourceDir = "./another/directory",
-              packageImportPath = "import com.facebook.react.anotherPackage;",
-              packageInstance = "new AnotherPackage()",
-              buildTypes = emptyList(),
-              libraryName = "anotherPackage",
-              componentDescriptors = listOf("AnotherPackageComponentDescriptor"),
-              cmakeListsPath = "./another/directory/with spaces/CMakeLists.txt",
-              cxxModuleCMakeListsPath = "./another/directory/cxx/CMakeLists.txt",
-              cxxModuleHeaderName = "AnotherCxxModule",
-              cxxModuleCMakeListsModuleName = "another_cxxModule",
-          ),
-      )
+  private val testDependencies = listOf(
+      ModelAutolinkingDependenciesPlatformAndroidJson(
+          sourceDir = "./a/directory",
+          packageImportPath = "import com.facebook.react.aPackage;",
+          packageInstance = "new APackage()",
+          buildTypes = emptyList(),
+          libraryName = "aPackage",
+          componentDescriptors = emptyList(),
+          cmakeListsPath = "./a/directory/CMakeLists.txt",
+      ),
+      ModelAutolinkingDependenciesPlatformAndroidJson(
+          sourceDir = "./another/directory",
+          packageImportPath = "import com.facebook.react.anotherPackage;",
+          packageInstance = "new AnotherPackage()",
+          buildTypes = emptyList(),
+          libraryName = "anotherPackage",
+          componentDescriptors = listOf("AnotherPackageComponentDescriptor"),
+          cmakeListsPath = "./another/directory/with spaces/CMakeLists.txt",
+          cxxModuleCMakeListsPath = "./another/directory/cxx/CMakeLists.txt",
+          cxxModuleHeaderName = "AnotherCxxModule",
+          cxxModuleCMakeListsModuleName = "another_cxxModule",
+      ),
+  )
 }

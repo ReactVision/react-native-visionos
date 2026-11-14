@@ -1,142 +1,105 @@
-<p align="center" style="background-colour: #CCCCCC;">
-  <a href="https://www.reactvision.xyz/">
-    <img src="https://avatars.githubusercontent.com/u/74572641?s=200&v=4" alt="ReactVision logo" width="120px" height="120px">
-  </a>
+<p align="center">
+   <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://reactnative.dev/react-native-dark.svg">
+      <source media="(prefers-color-scheme: light)" srcset="https://reactnative.dev/react-native-light.svg">
+      <img alt="React Native logo" src="https://reactnative.dev/react-native-light.svg" height="80">
+    </picture>
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@reactvision/react-native-visionos">
-    <img src="https://img.shields.io/npm/v/@reactvision/react-native-visionos" alt="npm version">
-  </a>
-  <a href="https://github.com/ReactVision/react-native-visionos/blob/0.86-stable/LICENSE">
-    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT licensed">
-  </a>
-  <a href="https://discord.gg/A6TaFNqwVc">
-    <img src="https://img.shields.io/discord/774471080713781259?label=Discord" alt="Discord">
-  </a>
+  <strong>Learn once, write anywhere:</strong><br>
+  Create native apps for Android, iOS, and more using React
 </p>
 
-# React Native for visionOS, By ReactVision
+<p align="center">
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="React Native is released under the MIT license" /></a>
+  <a href="https://www.npmjs.com/package/react-native"><img src="https://img.shields.io/npm/v/react-native.svg?color=blue" alt="Current npm package version" /></a>
+  <a href="https://www.npmjs.com/package/react-native"><img src="https://img.shields.io/npm/dm/react-native.svg" alt="Monthly npm downloads" /></a>
+  <a href="https://twitter.com/intent/follow?screen_name=reactnative"><img src="https://img.shields.io/badge/Follow_@reactnative-black?logo=x&logoColor=white" alt="Follow @reactnative on X" /></a>
+</p>
 
-React Native for visionOS lets you build Apple Vision Pro apps with React Native. It is an
-**out-of-tree platform**: your project keeps its `ios/` and `android/` folders and gains a
-`visionos/` one, all three driven by the same JavaScript.
+<h4 align="center">
+  <a href="https://reactnative.dev/docs/environment-setup">Getting Started</a>
+  <span> · </span>
+  <a href="https://reactnative.dev/docs/tutorial">Learn the Basics</a>
+  <span> · </span>
+  <a href="https://reactnative.dev/showcase">Showcase</a>
+  <span> · </span>
+  <a href="https://reactnative.dev/docs/contributing">Contribute</a>
+  <span> · </span>
+  <a href="https://reactnative.dev/help">Community</a>
+  <span> · </span>
+  <a href="./.github/SUPPORT.md">Support</a>
+</h4>
 
-This fork exists so that [ViroReact](https://github.com/ReactVision/viro) can render spatial scenes
-on visionOS. It is useful on its own for any React Native app targeting the platform.
+# React Native
 
-MIT licensed and free forever.
+React Native lets you build native apps using [React](https://react.dev/). Written
+in JavaScript, rendered with native code.
 
-## Attribution
+- **Native UI.** React Native primitives render to native platform UI, meaning your app
+  uses the same native platform APIs other apps do. Gestures, text scaling, and
+  accessibility behave the way users expect on each OS.
+- **React, everywhere.** Declarative UI, components, hooks, and Suspense, reused
+  across Android, iOS, and [other platforms](https://reactnative.dev/docs/out-of-tree-platforms).
+- **Developer Velocity.** See local changes in seconds. Changes to JavaScript code are applied with Fast Refresh, without rebuilding the native app.
+- **Extend it yourself.** Native Modules let you call platform code directly from JavaScript, synchronously and type-safe — or reach for [thousands of existing libraries](https://reactnative.directory/).
 
-This work stands on two others, and neither is ours:
+React Native is developed and supported by many companies and individual core contributors. Find out more on the [React Foundation website](https://react.foundation/).
 
-- **React Native** is built by Meta and its contributors. This repository is a fork of it, and every
-  commit of that history is preserved here.
-- **visionOS support** was created by [Callstack](https://github.com/callstack/react-native-visionos).
-  The platform, the Swift app scaffolding, the `visionos` resolver — that design is theirs. ReactVision
-  continues it from React Native 0.86 onward.
+## Building your first React Native app
 
-## Supported versions
+Follow the [Getting Started guide](https://reactnative.dev/docs/environment-setup) for a new app, or [Integration with Existing Apps](https://reactnative.dev/docs/integration-with-existing-apps) to adopt React Native incrementally.
 
-| React Native | Package | Status |
-| --- | --- | --- |
-| 0.86.x | `@reactvision/react-native-visionos@0.86.x` | ✅ Current |
-| 0.79.6 and earlier | `@callstack/react-native-visionos` | Callstack's releases |
+### Using a Framework
 
-The package version tracks the React Native line it is built from — `0.86.x` is React Native 0.86
-with visionOS support added. Install it *alongside* `react-native`, not instead of it.
+We believe that the best way to experience React Native is through a Framework, a toolbox with all the necessary APIs to let you build production ready apps. [Expo](https://docs.expo.dev/get-started/set-up-your-environment/) is a production-grade React Native Framework, with file-based routing, a standard library of native modules, and much more.
 
-The patch numbers are independent, and deliberately so: this package's own fixes ship without waiting
-for an upstream release, so **0.86.4 is built from upstream 0.86.3**. `reactNativeUpstreamVersion` in
-`packages/react-native/package.json` names the release the prebuilt artifacts come from, because the
-Core and Dependencies xcframeworks are fetched from Maven under *that* number and Gradle resolves
-`com.facebook.react:react-android` the same way. Without the split, a patch upstream has not made
-points every lookup at a version nobody published — which fails quietly, by falling back to building
-React Native from source.
+To create a new Expo project, run the following in your terminal:
 
-## Installation
+    npx create-expo-app@latest
 
-```bash
-npm install --save-dev @reactvision/react-native-visionos \
-  @callstack/out-of-tree-platforms @react-native-community/cli
-```
+Then follow the rest of [Expo's getting started guide](https://docs.expo.dev/get-started/set-up-your-environment/) to start building.
 
-`@callstack/out-of-tree-platforms` is what Metro resolves the `visionos` platform through, and the
-`visionos/` Podfile autolinks through `@react-native-community/cli`.
+### Without a Framework
 
-Then create the `visionos/` folder once — `expo prebuild` does not generate it. It comes from
-[`@reactvision/visionos-template`](https://github.com/ReactVision/visionos-template), a whole
-React Native project of which only the `visionos/` folder is lifted out:
-
-```bash
-npx @react-native-community/cli@latest init MyApp \
-  --template @reactvision/visionos-template \
-  --directory .visionos-template --skip-install
-mv .visionos-template/visionos ./visionos && rm -rf .visionos-template
-```
-
-And build:
-
-```bash
-npx expo prebuild
-cd visionos && pod install
-```
-
-`Platform.OS` is `"ios"` on visionOS — the platform keeps the iOS identity so that the ecosystem's
-iOS code paths work unchanged. Branch on the platform only where you genuinely need to.
-
-## Using it with ViroReact
-
-If you want 3D, AR or VR content rather than 2D UI, this fork is the foundation and
-[ViroReact](https://github.com/ReactVision/viro) is the renderer on top. Its config plugin wires up
-everything this platform needs — pods, the Metro resolver, the immersive space scene, the Xcode
-bundling phase — so a Viro project needs no manual visionOS setup.
-
-See the ViroReact visionOS guide for the full walkthrough.
-
-## What this adds to React Native
-
-- A `visionos` platform target, resolved through `@callstack/out-of-tree-platforms`
-- SwiftUI app scaffolding with `WindowGroup` and `ImmersiveSpace` scenes
-- `WindowManager` and `XR` native modules for opening windows and immersive spaces from JavaScript
-- visionOS-aware podspecs and build settings across React Native's own pods
+You can also use React Native without a Framework, however we've found that most developers benefit from one — navigation, native dependencies, and platform tooling are problems the ecosystem has already solved. If a Framework doesn't suit your app, follow [Getting Started Without a Framework](https://reactnative.dev/docs/getting-started-without-a-framework).
 
 ## Documentation
 
-React Native's own documentation applies unchanged for everything that is not visionOS-specific:
-<https://reactnative.dev/docs/getting-started>
+The full documentation for React Native can be found on our [website](https://reactnative.dev/docs/getting-started).
 
-For ViroReact and spatial rendering: <https://viro-community.readme.io/docs/overview>
+- [Introduction](https://reactnative.dev/docs/getting-started)
+- [Getting Started](https://reactnative.dev/docs/environment-setup)
+- [Learn the Basics](https://reactnative.dev/docs/tutorial)
+- [Components and APIs](https://reactnative.dev/docs/components-and-apis)
+- [UI & Interaction](https://reactnative.dev/docs/style)
+- [Native Modules](https://reactnative.dev/docs/native-platform)
+- [Debugging](https://reactnative.dev/docs/debugging)
+- [Upgrading](https://reactnative.dev/docs/upgrading)
+- [Architecture](https://reactnative.dev/architecture/overview)
 
-## Community
-
-Discord is the best place to find the team and other developers building with ReactVision:
-
-<a href="https://discord.gg/A6TaFNqwVc">
-  <img src="https://discordapp.com/api/guilds/774471080713781259/widget.png?style=banner2" />
-</a>
+The source for the React Native docs and website is hosted on a separate repository, [**react/react-native-website**](https://github.com/react/react-native-website).
 
 ## Contributing
 
-Issues and pull requests are welcome. Changes that belong upstream — in React Native itself, or in
-Callstack's visionOS work — are better sent there, and this fork will pick them up on the next
-rebase.
+The main purpose of this repository is to continue evolving React Native core. We want to make contributing to this project as easy and transparent as possible, and we are grateful to the community for contributing bug fixes and improvements. Read below to learn how you can take part in improving React Native.
 
-## Find Out More
+### [Code of Conduct](https://code.fb.com/codeofconduct/)
 
-- Website: <https://reactvision.xyz>
-- ViroReact: <https://reactvision.xyz/viro-react>
-- ReactVision Studio: <https://studio.reactvision.xyz>
-- Blog: <https://updates.reactvision.xyz>
+Meta has adopted a Code of Conduct that we expect project participants to adhere to.
+Please read the [full text](https://code.fb.com/codeofconduct/) so that you can understand what actions will and will not be tolerated.
 
-## A little history…
+### [Contributing Guide](https://reactnative.dev/docs/contributing)
 
-React Native was open-sourced by Meta in 2015. Callstack added visionOS as an out-of-tree platform in
-2024, carrying it to React Native 0.79. ReactVision picked it up from 0.86 to keep ViroReact shipping
-on Apple Vision Pro, and maintains this fork in the open.
+Read our [**Contributing Guide**](https://reactnative.dev/docs/contributing) to learn about our development process, how to propose bugfixes and improvements, and how to build and test your changes to React Native.
 
----
+### Discussions
 
-MIT licensed. React Native is © Meta Platforms, Inc. and affiliates; visionOS support is © Callstack
-and © ReactVision, Inc.
+Larger discussions and proposals are discussed in [**react-native-community/discussions-and-proposals**](https://github.com/react-native-community/discussions-and-proposals).
+
+React Native releases are discussed in [**reactwg/react-native-releases**](https://github.com/reactwg/react-native-releases/discussions).
+
+## License
+
+React Native is MIT licensed, as found in the [LICENSE](./LICENSE) file.

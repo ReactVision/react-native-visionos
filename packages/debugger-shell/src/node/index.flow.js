@@ -8,14 +8,11 @@
  * @format
  */
 
-import {
-  prepareDebuggerShellFromDotSlashFile,
-  spawnAndGetStderr,
-} from './private/LaunchUtils';
+import {prepareDebuggerShellFromDotSlashFile} from './private/LaunchUtils';
 
 const {spawn} = require('cross-spawn');
 const debug = require('debug')('Metro:DebuggerShell');
-const path = require('path');
+const path = require('node:path');
 
 // The 'prebuilt' flavor will use the prebuilt shell binary (and the JavaScript embedded in it).
 // The 'dev' flavor will use a stock Electron binary and run the shell code from the `electron/` directory.
@@ -174,20 +171,6 @@ async function unstable_prepareDebuggerShell({
         throw new Error(`Unknown flavor: ${flavor}`);
     }
 
-    const [binaryPath, baseArgs] = getShellBinaryAndArgs(
-      flavor,
-      prebuiltBinaryPath,
-    );
-    const {code, stderr} = await spawnAndGetStderr(binaryPath, [
-      ...baseArgs,
-      '--version',
-    ]);
-    if (code !== 0) {
-      return {
-        code: 'unexpected_error',
-        verboseInfo: stderr,
-      };
-    }
     return {code: 'success'};
   } catch (e) {
     return {

@@ -13,9 +13,9 @@
 const generateSpecsCLIExecutor = require('../generate-specs-cli-executor');
 const {CORE_LIBRARIES_WITH_OUTPUT_FOLDER} = require('./constants');
 const {codegenLog, cpSyncRecursiveIfChanged} = require('./utils');
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
 
 function generateNativeCode(
   outputPath /*: string */,
@@ -44,7 +44,7 @@ function generateCode(
 ) {
   if (shouldSkipGenerationForFBReactNativeSpec(schemaInfo, platform)) {
     codegenLog(
-      `[Codegen - FBReactNativeSpec] Skipping iOS code generation for ${schemaInfo.library.config.name} as it has been generated already.`,
+      '[Codegen - FBReactNativeSpec] Skipping iOS code generation for FBReactNativeSpec as it has been generated already.',
       true,
     );
     return;
@@ -89,17 +89,15 @@ function shouldSkipGenerationForFBReactNativeSpec(
   schemaInfo /*: $FlowFixMe */,
   platform /*: string */,
 ) {
-  const libraryName = schemaInfo.library.config.name;
   if (
     platform !== 'ios' ||
-    (libraryName !== 'FBReactNativeSpec' &&
-      libraryName !== 'FBReactNativeSpec_visionOS')
+    schemaInfo.library.config.name !== 'FBReactNativeSpec'
   ) {
     return false;
   }
 
   const fbReactNativeSpecOutputPath =
-    CORE_LIBRARIES_WITH_OUTPUT_FOLDER[libraryName].ios;
+    CORE_LIBRARIES_WITH_OUTPUT_FOLDER.FBReactNativeSpec.ios;
   const fbReactNativeSpecAbsolutePath = path.resolve(
     fbReactNativeSpecOutputPath,
   );

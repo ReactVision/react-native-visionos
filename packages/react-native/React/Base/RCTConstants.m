@@ -8,9 +8,6 @@
 #import "RCTConstants.h"
 
 NSString *const RCTPlatformName = @"ios";
-#if TARGET_OS_VISION
-NSString *const RCTPlatformExtension = @"visionos";
-#endif
 
 NSString *const RCTUserInterfaceStyleDidChangeNotification = @"RCTUserInterfaceStyleDidChangeNotification";
 NSString *const RCTUserInterfaceStyleDidChangeNotificationTraitCollectionKey = @"traitCollection";
@@ -23,6 +20,7 @@ NSString *const RCTJavaScriptWillStartExecutingNotification = @"RCTJavaScriptWil
 NSString *const RCTJavaScriptWillStartLoadingNotification = @"RCTJavaScriptWillStartLoadingNotification";
 
 NSString *const RCTDidInitializeModuleNotification = @"RCTDidInitializeModuleNotification";
+NSString *const RCTDidInitializeModuleNotificationModuleKey = @"module";
 
 NSString *const RCTNotifyEventDispatcherObserversOfEvent_DEPRECATED =
     @"RCTNotifyEventDispatcherObserversOfEvent_DEPRECATED";

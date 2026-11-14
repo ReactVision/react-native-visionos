@@ -8,25 +8,31 @@
  * @format
  */
 
-const {computeNightlyTarballURL, createLogger} = require('./utils');
-const {execSync} = require('child_process');
-const fs = require('fs');
-const path = require('path');
-const stream = require('stream');
-const {promisify} = require('util');
+const {createLogger, getMavenRepositoryUrls} = require('./utils');
+const {execSync} = require('node:child_process');
+const fs = require('node:fs');
+const path = require('node:path');
+const stream = require('node:stream');
+const {promisify} = require('node:util');
 
 const pipeline = promisify(stream.pipeline);
 const hermesLog = createLogger('Hermes');
+const artifactExistenceCache /*: Map<string, boolean> */ = new Map();
 
 /*::
 import type {BuildFlavor, Destination, Platform} from './types';
 */
 
 /**
- * Downloads hermes artifacts from the specified version and build type. If you want to specify a specific
- * version of hermes, use the HERMES_VERSION environment variable. The path to the artifacts will be inside
- * the .build/artifacts/hermes folder, but this can be overridden by setting the HERMES_ENGINE_TARBALL_PATH
- * environment variable. If this varuable is set, the script will use the local tarball instead of downloading it.
+ * Downloads hermes artifacts from the specified version and build type.
+ *
+ * Version resolution (in order):
+ * 1. `HERMES_ENGINE_TARBALL_PATH` env var → use that local file directly
+ * 2. `HERMES_VERSION` env var:
+ *    - `"latest-v1"` (default) → resolve latest version from npm's `latest-v1` dist-tag
+ *    - any semver string → use that exact version from Maven Central
+ * The resolved version is downloaded from Maven Central (stable) or from a
+ * Maven snapshot repo as fallback.
  */
 async function prepareHermesArtifactsAsync(
   reactNativeVersion /*:string*/,
@@ -57,12 +63,9 @@ async function prepareHermesArtifactsAsync(
     let resolvedVersion = process.env.HERMES_VERSION ?? 'latest-v1';
 
     if (resolvedVersion === 'latest-v1') {
+      // TODO: rename 'latest-v1' to 'latest' once V1 is the only Hermes on npm
       hermesLog('Using latest-v1 tarball');
-      const hermesVersion = await getLatestV1VersionFromNPM();
-      resolvedVersion = hermesVersion;
-    } else if (resolvedVersion === 'nightly') {
-      hermesLog('Using latest nightly tarball');
-      const hermesVersion = await getNightlyVersionFromNPM();
+      const hermesVersion = await getLatestHermesVersionFromNPM();
       resolvedVersion = hermesVersion;
     }
 
@@ -106,7 +109,8 @@ async function prepareHermesArtifactsAsync(
   return artifactsPath;
 }
 
-async function getLatestV1VersionFromNPM() /*: Promise<string> */ {
+async function getLatestHermesVersionFromNPM() /*: Promise<string> */ {
+  // TODO: rename 'latest-v1' to 'latest' once V1 is the only Hermes on npm
   const npmResponse /*: Response */ = await fetch(
     'https://registry.npmjs.org/hermes-compiler/latest-v1',
   );
@@ -118,43 +122,23 @@ async function getLatestV1VersionFromNPM() /*: Promise<string> */ {
   }
 
   const json = await npmResponse.json();
-  const latestV1 = json.version;
-  hermesLog(`Using version ${latestV1}`);
-  return latestV1;
-}
-
-async function getNightlyVersionFromNPM() /*: Promise<string> */ {
-  const npmResponse /*: Response */ = await fetch(
-    'https://registry.npmjs.org/hermes-compiler/nightly',
-  );
-
-  if (!npmResponse.ok) {
-    throw new Error(
-      `Couldn't get a response from NPM: ${npmResponse.status} ${npmResponse.statusText}`,
-    );
-  }
-
-  const json = await npmResponse.json();
-  const latestNightly = json.version;
-  hermesLog(`Using version ${latestNightly}`);
-  return latestNightly;
+  const latestVersion = json.version;
+  hermesLog(`Using version ${latestVersion}`);
+  return latestVersion;
 }
 
 /*::
 type HermesEngineSourceType =
   | 'local_prebuilt_tarball'
   | 'download_prebuild_tarball'
-  | 'download_prebuilt_nightly_tarball'
 */
 
 const HermesEngineSourceTypes /*:{
-  +DOWNLOAD_PREBUILD_TARBALL: "download_prebuild_tarball",
-  +DOWNLOAD_PREBUILT_NIGHTLY_TARBALL: "download_prebuilt_nightly_tarball",
-  +LOCAL_PREBUILT_TARBALL: "local_prebuilt_tarball"
+  readonly DOWNLOAD_PREBUILD_TARBALL: "download_prebuild_tarball",
+  readonly LOCAL_PREBUILT_TARBALL: "local_prebuilt_tarball"
 } */ = {
   LOCAL_PREBUILT_TARBALL: 'local_prebuilt_tarball',
   DOWNLOAD_PREBUILD_TARBALL: 'download_prebuild_tarball',
-  DOWNLOAD_PREBUILT_NIGHTLY_TARBALL: 'download_prebuilt_nightly_tarball',
 };
 
 /**
@@ -204,30 +188,39 @@ function hermesEngineTarballEnvvarDefined() /*: boolean */ {
   return !!process.env.HERMES_ENGINE_TARBALL_PATH;
 }
 
-function getTarballUrl(
-  version /*: string */,
-  buildType /*: BuildFlavor */,
-) /*: string */ {
-  // You can use the `ENTERPRISE_REPOSITORY` ariable to customise the base url from which artifacts will be downloaded.
-  // The mirror's structure must be the same of the Maven repo the react-native core team publishes on Maven Central.
-  const mavenRepoUrl =
-    process.env.ENTERPRISE_REPOSITORY ?? 'https://repo1.maven.org/maven2';
-  const namespace = 'com/facebook/hermes';
-  return `${mavenRepoUrl}/${namespace}/hermes-ios/${version}/hermes-ios-${version}-hermes-ios-${buildType.toLowerCase()}.tar.gz`;
-}
-
-async function getNightlyTarballUrl(
+async function getTarballUrl(
   version /*: string */,
   buildType /*: BuildFlavor */,
 ) /*: Promise<string> */ {
-  const artifactCoordinate = 'hermes-ios';
-  const artifactName = `hermes-ios-${buildType.toLowerCase()}.tar.gz`;
-  return await computeNightlyTarballURL(
-    version,
-    buildType,
-    'hermes',
-    artifactCoordinate,
-    artifactName,
+  const existingUrl = await findExistingTarballUrl(version, buildType);
+  if (existingUrl != null) {
+    return existingUrl;
+  }
+
+  return getTarballUrls(version, buildType)[0];
+}
+
+async function findExistingTarballUrl(
+  version /*: string */,
+  buildType /*: BuildFlavor */,
+) /*: Promise<?string> */ {
+  const candidates = getTarballUrls(version, buildType);
+  for (const url of candidates) {
+    if (await hermesArtifactExists(url)) {
+      return url;
+    }
+  }
+  return null;
+}
+
+function getTarballUrls(
+  version /*: string */,
+  buildType /*: BuildFlavor */,
+) /*: Array<string> */ {
+  const namespace = 'com/facebook/hermes';
+  return getMavenRepositoryUrls().map(
+    mavenRepoUrl =>
+      `${mavenRepoUrl}/${namespace}/hermes-ios/${version}/hermes-ios-${version}-hermes-ios-${buildType.toLowerCase()}.tar.gz`,
   );
 }
 
@@ -237,13 +230,21 @@ async function getNightlyTarballUrl(
 async function hermesArtifactExists(
   tarballUrl /*: string */,
 ) /*: Promise<boolean> */ {
+  const cached = artifactExistenceCache.get(tarballUrl);
+  if (cached != null) {
+    return cached;
+  }
+
   try {
     const response /*: Response */ = await fetch(tarballUrl, {
       method: 'HEAD',
     });
 
-    return response.status === 200;
+    const exists = response.status === 200;
+    artifactExistenceCache.set(tarballUrl, exists);
+    return exists;
   } catch (e) {
+    artifactExistenceCache.set(tarballUrl, false);
     return false;
   }
 }
@@ -260,23 +261,15 @@ async function hermesSourceType(
     return HermesEngineSourceTypes.LOCAL_PREBUILT_TARBALL;
   }
 
-  const tarballUrl = getTarballUrl(version, buildType);
-  if (await hermesArtifactExists(tarballUrl)) {
+  if ((await findExistingTarballUrl(version, buildType)) != null) {
     hermesLog(`Using download prebuild ${buildType} tarball`);
     return HermesEngineSourceTypes.DOWNLOAD_PREBUILD_TARBALL;
   }
 
-  // For nightly tarball, we need to resolve redirects first
-  const nightlyUrl = await getNightlyTarballUrl(version, buildType);
-  if (await hermesArtifactExists(nightlyUrl)) {
-    hermesLog('Using download prebuild nightly tarball');
-    return HermesEngineSourceTypes.DOWNLOAD_PREBUILT_NIGHTLY_TARBALL;
-  }
-
   hermesLog(
-    'Using download prebuild nightly tarball - this is a fallback and might not work.',
+    `No prebuilt tarball found for version ${version}. Falling back to DOWNLOAD_PREBUILD_TARBALL, which may fail.`,
   );
-  return HermesEngineSourceTypes.DOWNLOAD_PREBUILT_NIGHTLY_TARBALL;
+  return HermesEngineSourceTypes.DOWNLOAD_PREBUILD_TARBALL;
 }
 
 async function resolveSourceFromSourceType(
@@ -290,8 +283,6 @@ async function resolveSourceFromSourceType(
       return localPrebuiltTarball();
     case HermesEngineSourceTypes.DOWNLOAD_PREBUILD_TARBALL:
       return downloadPrebuildTarball(version, buildType, artifactsPath);
-    case HermesEngineSourceTypes.DOWNLOAD_PREBUILT_NIGHTLY_TARBALL:
-      return downloadPrebuiltNightlyTarball(version, buildType, artifactsPath);
     default:
       abort(
         `[Hermes] Unsupported or invalid source type provided: ${sourceType}`,
@@ -319,19 +310,9 @@ async function downloadPrebuildTarball(
   buildType /*: BuildFlavor */,
   artifactsPath /*: string*/,
 ) /*: Promise<string> */ {
-  const url = getTarballUrl(version, buildType);
+  const url = await getTarballUrl(version, buildType);
   hermesLog(`Using release tarball from URL: ${url}`);
   return downloadStableHermes(version, buildType, artifactsPath);
-}
-
-async function downloadPrebuiltNightlyTarball(
-  version /*: string */,
-  buildType /*: BuildFlavor */,
-  artifactsPath /*: string*/,
-) /*: Promise<string> */ {
-  const url = await getNightlyTarballUrl(version, buildType);
-  hermesLog(`Using nightly tarball from URL: ${url}`);
-  return downloadHermesTarball(url, version, buildType, artifactsPath);
 }
 
 async function downloadStableHermes(
@@ -339,7 +320,7 @@ async function downloadStableHermes(
   buildType /*: BuildFlavor */,
   artifactsPath /*: string */,
 ) /*: Promise<string> */ {
-  const tarballUrl = getTarballUrl(version, buildType);
+  const tarballUrl = await getTarballUrl(version, buildType);
   return downloadHermesTarball(tarballUrl, version, buildType, artifactsPath);
 }
 

@@ -22,10 +22,10 @@ const {
 } = require('../prepare-app-utils');
 
 // Mock child_process module
-jest.mock('child_process');
+jest.mock('node:child_process');
 
 // Mock fs module
-jest.mock('fs');
+jest.mock('node:fs');
 
 // Mock headers-utils module
 jest.mock('../headers-utils');
@@ -37,8 +37,8 @@ jest.mock('../prepare-app-dependencies-headers');
 jest.mock('../../codegen/generate-artifacts-executor');
 
 // Mock path module for absolute paths
-jest.mock('path', () => {
-  const actualPath = jest.requireActual('path');
+jest.mock('node:path', () => {
+  const actualPath = jest.requireActual('node:path');
   return {
     ...actualPath,
     join: jest.fn((...args) => args.join('/')),
@@ -62,7 +62,7 @@ describe('createHardlinks', () => {
     mockSymlinkThirdPartyDependenciesHeaders =
       headersUtils.symlinkThirdPartyDependenciesHeaders;
 
-    mockPath = require('path');
+    mockPath = require('node:path');
     mockConsoleLog = console.log;
 
     // Clear and reset all mocks completely
@@ -376,7 +376,7 @@ describe('prepareHeaders', () => {
     mockPrepareAppDependenciesHeaders =
       prepareAppDependenciesHeadersModule.prepareAppDependenciesHeaders;
 
-    mockPath = require('path');
+    mockPath = require('node:path');
     mockConsoleLog = console.log;
 
     // Clear and reset all mocks completely
@@ -702,7 +702,7 @@ describe('findXcodeProjectDirectory', () => {
 
   beforeEach(() => {
     // Setup mock
-    const childProcess = require('child_process');
+    const childProcess = require('node:child_process');
     mockExecSync = childProcess.execSync;
 
     // Reset all mocks
@@ -846,8 +846,8 @@ describe('setBuildFromSource', () => {
 
   beforeEach(() => {
     // Setup mocks
-    mockFs = require('fs');
-    mockPath = require('path');
+    mockFs = require('node:fs');
+    mockPath = require('node:path');
     mockConsoleLog = console.log;
     mockConsoleWarn = console.warn;
 
@@ -1076,7 +1076,7 @@ describe('runIosPrebuild', () => {
 
   beforeEach(() => {
     // Setup mocks
-    const childProcess = require('child_process');
+    const childProcess = require('node:child_process');
     mockExecSync = childProcess.execSync;
 
     mockConsoleLog = console.log;
@@ -1093,7 +1093,7 @@ describe('runIosPrebuild', () => {
     process.env = originalProcessEnv;
   });
 
-  it('should run iOS prebuild successfully with nightly versions', async () => {
+  it('should run iOS prebuild successfully with prebuilt versions', async () => {
     // Setup
     const reactNativePath = '/path/to/react-native';
 
@@ -1108,13 +1108,13 @@ describe('runIosPrebuild', () => {
       env: {
         ...originalProcessEnv,
         RN_DEP_VERSION: 'nightly',
-        HERMES_VERSION: 'nightly',
+        HERMES_VERSION: 'latest-v1',
       },
       stdio: 'inherit',
     });
     expect(mockExecSync).toHaveBeenCalledTimes(1);
     expect(mockConsoleLog).toHaveBeenCalledWith(
-      'Running iOS prebuild with nightly versions...',
+      'Running iOS prebuild with prebuilt versions...',
     );
     expect(mockConsoleLog).toHaveBeenCalledWith('✓ iOS prebuild completed');
     expect(mockConsoleLog).toHaveBeenCalledTimes(2);
@@ -1135,7 +1135,7 @@ describe('runIosPrebuild', () => {
       env: {
         ...originalProcessEnv,
         RN_DEP_VERSION: 'nightly',
-        HERMES_VERSION: 'nightly',
+        HERMES_VERSION: 'latest-v1',
       },
       stdio: 'inherit',
     });
@@ -1156,7 +1156,7 @@ describe('runIosPrebuild', () => {
       env: {
         ...originalProcessEnv,
         RN_DEP_VERSION: 'nightly',
-        HERMES_VERSION: 'nightly',
+        HERMES_VERSION: 'latest-v1',
       },
       stdio: 'inherit',
     });
@@ -1181,12 +1181,12 @@ describe('runIosPrebuild', () => {
       env: {
         ...originalProcessEnv,
         RN_DEP_VERSION: 'nightly',
-        HERMES_VERSION: 'nightly',
+        HERMES_VERSION: 'latest-v1',
       },
       stdio: 'inherit',
     });
     expect(mockConsoleLog).toHaveBeenCalledWith(
-      'Running iOS prebuild with nightly versions...',
+      'Running iOS prebuild with prebuilt versions...',
     );
     expect(mockConsoleLog).not.toHaveBeenCalledWith('✓ iOS prebuild completed');
   });
@@ -1221,7 +1221,7 @@ describe('runIosPrebuild', () => {
       env: {
         ...originalProcessEnv,
         RN_DEP_VERSION: 'nightly',
-        HERMES_VERSION: 'nightly',
+        HERMES_VERSION: 'latest-v1',
       },
       stdio: 'inherit',
     });
@@ -1235,7 +1235,7 @@ describe('runPodDeintegrate', () => {
 
   beforeEach(() => {
     // Setup mocks
-    const childProcess = require('child_process');
+    const childProcess = require('node:child_process');
     mockExecSync = childProcess.execSync;
 
     mockConsoleLog = console.log;
@@ -1370,8 +1370,8 @@ describe('configureAppForSwift', () => {
 
   beforeEach(() => {
     // Setup mocks
-    mockFs = require('fs');
-    mockPath = require('path');
+    mockFs = require('node:fs');
+    mockPath = require('node:path');
     mockConsoleLog = console.log;
 
     // Clear and reset all mocks completely

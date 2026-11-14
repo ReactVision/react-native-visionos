@@ -14,14 +14,16 @@
 import type {Command} from '@react-native-community/cli-types';
  */
 
-// React Native shouldn't be exporting itself like this, the Community Template should be be directly
-// depending on and injecting:
+// IMPORTANT: This is a routing file only. Do NOT add new command
+// definitions or implementations here.
+//
+// New CLI commands belong in @react-native/community-cli-plugin, and
+// may (temporarily) be imported and registered here.
+//
+// Future state: The Community Template should directly depend on and inject:
 // - @react-native-community/cli-platform-android
 // - @react-native-community/cli-platform-ios
-// - @react-native/community-cli-plugin (via the @react-native/core-cli-utils package)
-// - codegen command should be inhoused into @react-native-community/cli
-//
-// This is a temporary workaround.
+// - @react-native/community-cli-plugin
 
 const verbose = Boolean(process.env.DEBUG?.includes('react-native'));
 
@@ -56,13 +58,9 @@ try {
 }
 
 let ios;
-let apple;
 try {
   ios = findCommunityPlatformPackage(
     '@react-native-community/cli-platform-ios',
-  );
-  apple = findCommunityPlatformPackage(
-    '@react-native-community/cli-platform-apple',
   );
 } catch {
   if (verbose) {
@@ -76,64 +74,20 @@ const commands /*: Array<Command> */ = [];
 
 const {
   bundleCommand,
+  codegenCommand,
+  spmCommand,
   startCommand,
 } = require('@react-native/community-cli-plugin');
 
-commands.push(bundleCommand, startCommand);
-
-const codegenCommand /*: Command */ = {
-  name: 'codegen',
-  options: [
-    {
-      name: '--path <path>',
-      description: 'Path to the React Native project root.',
-      default: process.cwd(),
-    },
-    {
-      name: '--platform <string>',
-      description:
-        'Target platform. Supported values: "android", "ios", "visionos", "all".',
-      default: 'all',
-    },
-    {
-      name: '--outputPath <path>',
-      description: 'Path where generated artifacts will be output to.',
-    },
-    {
-      name: '--source <string>',
-      description: 'Whether the script is invoked from an `app` or a `library`',
-      default: 'app',
-    },
-  ],
-  func: (argv, config, args) =>
-    require('./scripts/codegen/generate-artifacts-executor').execute(
-      args.path,
-      args.platform,
-      args.outputPath,
-      args.source,
-    ),
-};
-commands.push(codegenCommand);
+commands.push(bundleCommand, startCommand, spmCommand, codegenCommand);
 
 const config = {
   commands,
   platforms: {} /*:: as {[string]: Readonly<{
-      npmPackageName?: string,
       projectConfig: unknown,
       dependencyConfig: unknown,
     }>} */,
 };
-
-if (apple != null) {
-  config.commands.push(
-    ...require('./local-cli/localCommands').createCommands(apple),
-  );
-  config.platforms.visionos = {
-    npmPackageName: '@reactvision/react-native-visionos',
-    projectConfig: apple.getProjectConfig({platformName: 'visionos'}),
-    dependencyConfig: apple.getDependencyConfig({platformName: 'visionos'}),
-  };
-}
 
 if (ios != null) {
   config.commands.push(...ios.commands);

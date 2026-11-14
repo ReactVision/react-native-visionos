@@ -26,10 +26,10 @@ const {
   prepareArtifacts,
   setupGHAArtifacts,
 } = require('./utils/testing-utils');
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
+const {styleText} = require('node:util');
 const {cd, exec, popd, pushd, pwd, sed} = require('shelljs');
-const {styleText} = require('util');
 const yargs = require('yargs');
 
 /* ::
@@ -155,18 +155,15 @@ async function testRNTesterAndroid(
   if (ciArtifacts != null) {
     const downloadPath = path.join(ciArtifacts.baseTmpPath(), 'rntester.zip');
 
-    const emulatorArch = exec('adb shell getprop ro.product.cpu.abi').trim();
-
     // Github Actions zips all the APKs in a single archive
     console.info('Start Downloading APK');
-    const rntesterAPKURL =
-      await ciArtifacts.artifactURLForRNTesterAPK(emulatorArch);
+    const rntesterAPKURL = await ciArtifacts.artifactURLForRNTesterAPK();
 
     ciArtifacts.downloadArtifact(rntesterAPKURL, downloadPath);
     const unzipFolder = path.join(ciArtifacts.baseTmpPath(), 'rntester-apks');
     exec(`rm -rf ${unzipFolder}`);
     exec(`unzip ${downloadPath} -d ${unzipFolder}`);
-    let apkPath = path.join(unzipFolder, `app-${emulatorArch}-debug.apk`);
+    const apkPath = path.join(unzipFolder, 'app-arm64-v8a-debug.apk');
 
     exec(`adb install ${apkPath}`);
   } else {
@@ -292,7 +289,7 @@ async function testRNTestProject(
 
   // need to do this here so that Android will be properly setup either way
   exec(
-    `echo "react.internal.mavenLocalRepo=${mavenLocalPath}" >> android/gradle.properties`,
+    `echo -e "\nreact.internal.mavenLocalRepo=${mavenLocalPath}" >> android/gradle.properties`,
   );
 
   // Only build the simulator architecture. CI is however generating only that one.

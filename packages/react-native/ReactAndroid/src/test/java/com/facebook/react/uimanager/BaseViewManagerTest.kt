@@ -12,6 +12,8 @@ package com.facebook.react.uimanager
 import android.view.View.OnFocusChangeListener
 import com.facebook.react.R
 import com.facebook.react.bridge.BridgeReactContext
+import com.facebook.react.bridge.DynamicFromObject
+import com.facebook.react.bridge.JavaOnlyArray
 import com.facebook.react.bridge.JavaOnlyMap
 import com.facebook.react.internal.featureflags.ReactNativeFeatureFlagsForTests
 import com.facebook.react.views.view.ReactViewGroup
@@ -70,6 +72,38 @@ class BaseViewManagerTest {
   }
 
   @Test
+  fun testAccessibilityStateDisabledRemovedReenablesView() {
+    viewManager.setViewState(view, JavaOnlyMap.of("disabled", true))
+    Assertions.assertThat(view.isEnabled).isFalse()
+
+    viewManager.setViewState(view, JavaOnlyMap())
+    Assertions.assertThat(view.isEnabled).isTrue()
+  }
+
+  @Test
+  fun testAccessibilityStateNullReenablesView() {
+    viewManager.setViewState(view, JavaOnlyMap.of("disabled", true))
+    viewManager.setViewState(view, null)
+    Assertions.assertThat(view.isEnabled).isTrue()
+  }
+
+  @Test
+  fun testAccessibilityStateDisabledNullDoesNotCrash() {
+    viewManager.setViewState(view, JavaOnlyMap.of("disabled", true))
+    viewManager.setViewState(view, JavaOnlyMap.of("disabled", null))
+    Assertions.assertThat(view.isEnabled).isTrue()
+  }
+
+  @Test
+  fun testAccessibilityStateWithoutDisabledKeepsViewDisabledByOtherProps() {
+    view.isEnabled = false
+    viewManager.setViewState(view, JavaOnlyMap())
+    Assertions.assertThat(view.isEnabled).isFalse()
+    viewManager.setViewState(view, null)
+    Assertions.assertThat(view.isEnabled).isFalse()
+  }
+
+  @Test
   fun testRoleList() {
     viewManager.setRole(view, "list")
     Assertions.assertThat(view.getTag(R.id.role)).isEqualTo(ReactAccessibilityDelegate.Role.LIST)
@@ -100,5 +134,32 @@ class BaseViewManagerTest {
     view.onFocusChangeListener.onFocusChange(view, true)
     verify(originalFocusListener, times(2)).onFocusChange(view, true)
     Assertions.assertThat(originalFocusListener).isEqualTo(view.onFocusChangeListener)
+  }
+
+  @Test
+  fun testAccessibilityLabelledByString() {
+    viewManager.setAccessibilityLabelledBy(view, DynamicFromObject("target_id"))
+    Assertions.assertThat(view.getTag(R.id.labelled_by)).isEqualTo("target_id")
+  }
+
+  @Test
+  fun testAccessibilityLabelledByArray() {
+    val array = JavaOnlyArray.of("first_id", "second_id")
+    viewManager.setAccessibilityLabelledBy(view, DynamicFromObject(array))
+    Assertions.assertThat(view.getTag(R.id.labelled_by)).isEqualTo("first_id")
+  }
+
+  @Test
+  fun testAccessibilityLabelledByNullClearsTag() {
+    view.setTag(R.id.labelled_by, "stale_id")
+    viewManager.setAccessibilityLabelledBy(view, DynamicFromObject(null))
+    Assertions.assertThat(view.getTag(R.id.labelled_by)).isNull()
+  }
+
+  @Test
+  fun testAccessibilityLabelledByEmptyArrayDoesNotCrash() {
+    view.setTag(R.id.labelled_by, "stale_id")
+    viewManager.setAccessibilityLabelledBy(view, DynamicFromObject(JavaOnlyArray()))
+    Assertions.assertThat(view.getTag(R.id.labelled_by)).isNull()
   }
 }

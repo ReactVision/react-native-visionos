@@ -19,7 +19,6 @@ import type {KeyboardEvent, KeyboardMetrics} from './Keyboard';
 import LayoutAnimation from '../../LayoutAnimation/LayoutAnimation';
 import StyleSheet from '../../StyleSheet/StyleSheet';
 import Platform from '../../Utilities/Platform';
-import warnOnce from '../../Utilities/warnOnce';
 import {type EventSubscription} from '../../vendor/emitter/EventEmitter';
 import AccessibilityInfo from '../AccessibilityInfo/AccessibilityInfo';
 import View from '../View/View';
@@ -27,30 +26,37 @@ import Keyboard from './Keyboard';
 import * as React from 'react';
 import {createRef} from 'react';
 
-export type KeyboardAvoidingViewProps = Readonly<{
-  ...ViewProps,
-
+type KeyboardAvoidingViewPropsCore = Readonly<{
   /**
    * Specify how to react to the presence of the keyboard.
    */
   behavior?: ?('height' | 'position' | 'padding'),
 
   /**
-   * Style of the content container when `behavior` is 'position'.
+   * The style of the content container (View) when `behavior` is 'position'.
    */
   contentContainerStyle?: ?ViewStyleProp,
 
   /**
-   * Controls whether this `KeyboardAvoidingView` instance should take effect.
-   * This is useful when more than one is on the screen. Defaults to true.
+   * Whether the `KeyboardAvoidingView` is enabled.
+   *
+   * @default `true`
    */
   enabled?: ?boolean,
 
   /**
-   * Distance between the top of the user screen and the React Native view. This
-   * may be non-zero in some cases. Defaults to 0.
+   * Distance between the top of the user screen and the React Native view,
+   * may be non-zero in some use cases.
+   *
+   * @default `0`
    */
   keyboardVerticalOffset?: number,
+}>;
+
+/** @build-types emit-as-interface Uniwind compatibility */
+export type KeyboardAvoidingViewProps = Readonly<{
+  ...ViewProps,
+  ...KeyboardAvoidingViewPropsCore,
 }>;
 
 type KeyboardAvoidingViewState = {
@@ -58,8 +64,10 @@ type KeyboardAvoidingViewState = {
 };
 
 /**
- * View that moves out of the way when the keyboard appears by automatically
- * adjusting its height, position, or bottom padding.
+ * Automatically adjusts its height, position, or bottom padding based on the
+ * keyboard height to remain visible while the virtual keyboard is displayed.
+ *
+ * @see https://reactnative.dev/docs/keyboardavoidingview
  */
 class KeyboardAvoidingView extends React.Component<
   KeyboardAvoidingViewProps,
@@ -197,13 +205,6 @@ class KeyboardAvoidingView extends React.Component<
     }
 
     if (Platform.OS === 'ios') {
-      if (Platform.isVision === true) {
-        warnOnce(
-          'KeyboardAvoidingView-unavailable',
-          'KeyboardAvoidingView is not available on visionOS platform. The system displays the keyboard in a separate window, leaving the app’s window unaffected by the keyboard’s appearance and disappearance',
-        );
-        return;
-      }
       this._subscriptions = [
         // When undocked, split or floating, iOS will emit
         // UIKeyboardWillHideNotification notification.
@@ -240,16 +241,6 @@ class KeyboardAvoidingView extends React.Component<
       onLayout,
       ...props
     } = this.props;
-
-    if (Platform.isVision === true) {
-      // KeyboardAvoidingView is not supported on VisionOS, so we return a simple View without the onLayout handler
-      return (
-        <View ref={this.viewRef} style={style} {...props}>
-          {children}
-        </View>
-      );
-    }
-
     const bottomHeight = enabled === true ? this.state.bottom : 0;
     switch (behavior) {
       case 'height':
@@ -314,5 +305,7 @@ class KeyboardAvoidingView extends React.Component<
     }
   }
 }
+
+export type KeyboardAvoidingViewInstance = KeyboardAvoidingView;
 
 export default KeyboardAvoidingView;

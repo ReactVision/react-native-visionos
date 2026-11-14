@@ -61,8 +61,7 @@ type SuiteResults = Array<Readonly<TaskResult>>;
 type TestWithArgName<TestArgType> = string | ((testArg: TestArgType) => string);
 
 type TestWithArgOptions<TestArgType> =
-  | FnOptions
-  | ((testArg: TestArgType) => FnOptions);
+  FnOptions | ((testArg: TestArgType) => FnOptions);
 
 interface ParameterizedTestFunction {
   <TestArgType>(
@@ -87,7 +86,7 @@ interface TestFunction {
 }
 
 interface SuiteAPI {
-  +test: TestFunction;
+  readonly test: TestFunction;
   verify(fn: (results: SuiteResults) => void): SuiteAPI;
 }
 

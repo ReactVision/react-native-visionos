@@ -11,15 +11,15 @@
 
 import '@react-native/fantom/src/setUpDefaultReactNativeEnvironment';
 
-import type {AccessibilityProps, HostInstance} from 'react-native';
+import type {HostInstance} from 'react-native';
+import type {AccessibilityProps} from 'react-native';
 
 import * as Fantom from '@react-native/fantom';
+import nullthrows from 'nullthrows';
 import * as React from 'react';
 import {createRef} from 'react';
 import {Text, TouchableHighlight, View} from 'react-native';
 import accessibilityPropsSuite from 'react-native/src/private/__tests__/utilities/accessibilityPropsSuite';
-import ensureInstance from 'react-native/src/private/__tests__/utilities/ensureInstance';
-import ReactNativeElement from 'react-native/src/private/webapis/dom/nodes/ReactNativeElement';
 
 describe('<TouchableHighlight>', () => {
   describe('props', () => {
@@ -214,7 +214,7 @@ describe('<TouchableHighlight>', () => {
           );
         });
 
-        const element = ensureInstance(elementRef.current, ReactNativeElement);
+        const element = nullthrows(elementRef.current);
         Fantom.dispatchNativeEvent(element, 'click');
 
         expect(onPressCallback).toHaveBeenCalledTimes(1);
@@ -240,7 +240,7 @@ describe('<TouchableHighlight>', () => {
           );
         });
 
-        const element = ensureInstance(elementRef.current, ReactNativeElement);
+        const element = nullthrows(elementRef.current);
         Fantom.dispatchNativeEvent(element, 'click');
 
         expect(onShowUnderlayCallback).toHaveBeenCalledTimes(1);
@@ -265,7 +265,7 @@ describe('<TouchableHighlight>', () => {
           );
         });
 
-        const element = ensureInstance(elementRef.current, ReactNativeElement);
+        const element = nullthrows(elementRef.current);
         Fantom.dispatchNativeEvent(element, 'click');
 
         expect(onPressCallback).toHaveBeenCalledTimes(0);
@@ -370,7 +370,7 @@ describe('<TouchableHighlight>', () => {
           <rn-view accessibilityState="{disabled:true,selected:false,checked:None,busy:false,expanded:null}" />,
         );
 
-        const element = ensureInstance(elementRef.current, ReactNativeElement);
+        const element = nullthrows(elementRef.current);
         Fantom.dispatchNativeEvent(element, 'click');
 
         expect(onPressCallback).toHaveBeenCalledTimes(0);
@@ -395,6 +395,48 @@ describe('<TouchableHighlight>', () => {
           </rn-view>,
         );
       });
+
+      // Regression test for #54933: a `React.Fragment` cannot accept the
+      // underlay style applied via `cloneElement`, so the highlight effect
+      // is silently broken. Render the Fragment unchanged and surface an
+      // actionable dev warning pointing the user at wrapping in <View>.
+      it('logs a dev warning when given a React.Fragment as a child', () => {
+        const originalConsoleWarn = console.warn;
+        const mockConsoleWarn = jest.fn();
+        // $FlowExpectedError[cannot-write]
+        console.warn = mockConsoleWarn;
+
+        try {
+          const root = Fantom.createRoot();
+
+          Fantom.runTask(() => {
+            root.render(
+              <TouchableHighlight>
+                <React.Fragment>
+                  <Text>First</Text>
+                  <Text>Second</Text>
+                </React.Fragment>
+              </TouchableHighlight>,
+            );
+          });
+
+          expect(
+            root.getRenderedOutput({props: ['accessible']}).toJSX(),
+          ).toEqual(
+            <rn-view accessible="true">
+              <rn-paragraph key="0">First</rn-paragraph>
+              <rn-paragraph key="1">Second</rn-paragraph>
+            </rn-view>,
+          );
+          expect(mockConsoleWarn).toHaveBeenCalledTimes(1);
+          expect(mockConsoleWarn.mock.calls[0][0]).toContain(
+            'TouchableHighlight does not support React.Fragment as a child',
+          );
+        } finally {
+          // $FlowExpectedError[cannot-write]
+          console.warn = originalConsoleWarn;
+        }
+      });
     });
   });
 
@@ -413,7 +455,7 @@ describe('<TouchableHighlight>', () => {
           );
         });
 
-        expect(elementRef.current).toBeInstanceOf(ReactNativeElement);
+        expect(elementRef.current).toBeInstanceOf(HTMLElement);
       });
 
       it('uses the "RN:View" tag name', () => {
@@ -429,7 +471,7 @@ describe('<TouchableHighlight>', () => {
           );
         });
 
-        const element = ensureInstance(elementRef.current, ReactNativeElement);
+        const element = nullthrows(elementRef.current);
         expect(element.tagName).toBe('RN:View');
       });
     });

@@ -24,8 +24,8 @@ const {
   validateDotSlashArtifactData,
 } = require('./utils/dotslash-utils');
 const {diff: jestDiff} = require('jest-diff');
-const path = require('path');
-const {parseArgs} = require('util');
+const path = require('node:path');
+const {parseArgs} = require('node:util');
 
 const FIRST_PARTY_DOTSLASH_FILES = [
   'packages/debugger-shell/bin/react-native-devtools',
@@ -134,7 +134,7 @@ function isPreviousReleaseAssetProvider(
   return (
     isHttpProvider(provider) &&
     provider.url.startsWith(
-      'https://github.com/react/react-native/releases/download/',
+      'https://github.com/facebook/react-native/releases/download/',
     )
   );
 }
@@ -146,7 +146,7 @@ function createReleaseAssetProvider(
   } /*: {releaseTag: string, suggestedFilename: string} */,
 ) /*: DotSlashProvider */ {
   return {
-    url: `https://github.com/react/react-native/releases/download/${encodeURIComponent(releaseTag)}/${encodeURIComponent(suggestedFilename)}`,
+    url: `https://github.com/facebook/react-native/releases/download/${encodeURIComponent(releaseTag)}/${encodeURIComponent(suggestedFilename)}`,
   };
 }
 

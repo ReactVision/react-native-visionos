@@ -24,9 +24,6 @@ AppRegistry.registerComponent('SetPropertiesExampleApp', () =>
 AppRegistry.registerComponent('RootViewSizeFlexibilityExampleApp', () =>
   require('./examples/RootViewSizeFlexibilityExample/RootViewSizeFlexibilityExampleApp'),
 );
-AppRegistry.registerComponent('SecondWindow', () =>
-  require('./examples/SecondWindow/SecondWindow'),
-);
 AppRegistry.registerComponent('RNTesterApp', () => RNTesterApp);
 
 // Register suitable examples for snapshot tests

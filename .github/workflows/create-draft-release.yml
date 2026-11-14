@@ -3,23 +3,10 @@ name: Create Draft Release
 on:
   workflow_call:
     inputs:
-      releaseVersion:
-        required: false
-        type: string
-      checkoutRef:
-        required: false
-        type: string
-      releaseId:
-        required: false
-        type: string
       hermesVersion:
         required: false
         type: string
-        description: The version of Hermes to use for this release (eg. 0.15.0). If not specified, it will use React Native Version
-      hermesV1Version:
-        required: false
-        type: string
-        description: The version of Hermes V1 to use for this release (eg. 250829098.0.2). If not specified, it will use React Native Version
+        description: The version of Hermes to use for this release (eg. 250829098.0.2). If not specified, it will read HERMES_VERSION_NAME from version.properties
 
 jobs:
   create-draft-release:
@@ -29,7 +16,6 @@ jobs:
         uses: actions/checkout@v6
         with:
           token: ${{ secrets.REACT_NATIVE_BOT_GITHUB_TOKEN }}
-          ref: ${{ inputs.checkoutRef || github.ref }}
           fetch-depth: 0
           fetch-tags: true
       - name: Install dependencies
@@ -40,24 +26,23 @@ jobs:
           git config --local user.email "bot@reactnative.dev"
           git config --local user.name "React Native Bot"
       - name: Create draft release
-        if: inputs.releaseId == ''
         uses: actions/github-script@v8
         id: create-draft-release
         with:
           script: |
             const {createDraftRelease} = require('./.github/workflow-scripts/createDraftRelease.js');
-            const version = '${{ inputs.releaseVersion || github.ref_name }}';
+            const version = '${{ github.ref_name }}';
             const {isLatest} = require('./.github/workflow-scripts/publishTemplate.js');
-            return (await createDraftRelease(version, isLatest(), '${{secrets.REACT_NATIVE_BOT_GITHUB_TOKEN}}', '${{ inputs.hermesVersion }}', '${{ inputs.hermesV1Version }}')).id;
+            return (await createDraftRelease(version, isLatest(), '${{secrets.REACT_NATIVE_BOT_GITHUB_TOKEN}}', '${{ inputs.hermesVersion }}')).id;
           result-encoding: string
       - name: Upload release assets for DotSlash
         uses: actions/github-script@v8
         env:
-          RELEASE_ID: ${{ inputs.releaseId || steps.create-draft-release.outputs.result }}
+          RELEASE_ID: ${{ steps.create-draft-release.outputs.result }}
         with:
           script: |
             const {uploadReleaseAssetsForDotSlashFiles} = require('./scripts/releases/upload-release-assets-for-dotslash.js');
-            const version = '${{ inputs.releaseVersion || github.ref_name }}';
+            const version = '${{ github.ref_name }}';
             await uploadReleaseAssetsForDotSlashFiles({
               version,
               token: '${{secrets.REACT_NATIVE_BOT_GITHUB_TOKEN}}',

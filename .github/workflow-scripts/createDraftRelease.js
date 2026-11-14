@@ -23,8 +23,8 @@ function _extractChangelog(version) {
     // for RC.0 and for the release of a new stable minor, the changelog is too long
     // to be added in a release. The release body is usually something shorter.
     // See for example the release for 0.76.0 or 0.77.0:
-    // 0.76: https://github.com/react/react-native/releases/tag/v0.76.0
-    // 0.77: https://github.com/react/react-native/releases/tag/v0.77.0
+    // 0.76: https://github.com/facebook/react-native/releases/tag/v0.76.0
+    // 0.77: https://github.com/facebook/react-native/releases/tag/v0.77.0
     return '';
   }
   const changelog = String(fs.readFileSync('CHANGELOG.md', 'utf8')).split('\n');
@@ -40,28 +40,40 @@ function _extractChangelog(version) {
   return changelog.slice(changelogStarts, changelogEnds).join('\n').trim();
 }
 
-function _computeBody(changelog, version, hermesVersion, hermesV1Version) {
-  hermesVersion = hermesVersion ?? version;
-  hermesV1Version = hermesV1Version ?? version;
+function _readHermesVersionFromProperties() {
+  const propertiesPath =
+    'packages/react-native/sdks/hermes-engine/version.properties';
+  const content = String(fs.readFileSync(propertiesPath, 'utf8'));
+  const match = content.match(/^HERMES_VERSION_NAME=(.+)$/m);
+  if (!match) {
+    throw new Error(`HERMES_VERSION_NAME not found in ${propertiesPath}`);
+  }
+  return match[1].trim();
+}
+
+function _computeBody(changelog, version, hermesVersion) {
+  // The workflow input is optional and arrives as an empty string when unset,
+  // so treat both missing and empty as "fall back to version.properties".
+  // Falling back to ${version} would produce 404 dSYMS URLs since Hermes V1
+  // versions (e.g. 250829098.0.13) don't track RN versions.
+  if (hermesVersion == null || hermesVersion === '') {
+    hermesVersion = _readHermesVersionFromProperties();
+  }
   return `${changelog}
 
 ---
 
-Hermes dSYMS:
+Hermes V1 dSYMS:
 - [Debug](https://repo1.maven.org/maven2/com/facebook/hermes/hermes-ios/${hermesVersion}/hermes-ios-${hermesVersion}-hermes-framework-dSYM-debug.tar.gz)
 - [Release](https://repo1.maven.org/maven2/com/facebook/hermes/hermes-ios/${hermesVersion}/hermes-ios-${hermesVersion}-hermes-framework-dSYM-release.tar.gz)
-
-Hermes V1 dSYMS:
-- [Debug](https://repo1.maven.org/maven2/com/facebook/hermes/hermes-ios/${hermesV1Version}/hermes-ios-${hermesV1Version}-hermes-framework-dSYM-debug.tar.gz)
-- [Release](https://repo1.maven.org/maven2/com/facebook/hermes/hermes-ios/${hermesV1Version}/hermes-ios-${hermesV1Version}-hermes-framework-dSYM-release.tar.gz)
 
 ReactNativeDependencies dSYMs:
 - [Debug](https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/${version}/react-native-artifacts-${version}-reactnative-dependencies-dSYM-debug.tar.gz)
 - [Release](https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/${version}/react-native-artifacts-${version}-reactnative-dependencies-dSYM-release.tar.gz)
 
 ReactNative Core dSYMs:
-- [Debug](https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/${version}/react-native-artifacts-${version}-reactnative-core-debug.tar.gz)
-- [Release](https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/${version}/react-native-artifacts-${version}-reactnative-core-release.tar.gz)
+- [Debug](https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/${version}/react-native-artifacts-${version}-reactnative-core-dSYM-debug.tar.gz)
+- [Release](https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/${version}/react-native-artifacts-${version}-reactnative-core-dSYM-release.tar.gz)
 
 ---
 
@@ -73,11 +85,11 @@ To help you upgrade to this version, you can use the [Upgrade Helper](https://re
 
 ---
 
-View the whole changelog in the [CHANGELOG.md file](https://github.com/react/react-native/blob/main/CHANGELOG.md).`;
+View the whole changelog in the [CHANGELOG.md file](https://github.com/facebook/react-native/blob/main/CHANGELOG.md).`;
 }
 
 async function _verifyTagExists(version) {
-  const url = `https://github.com/react/react-native/releases/tag/v${version}`;
+  const url = `https://github.com/facebook/react-native/releases/tag/v${version}`;
 
   const response = await fetch(url);
   if (response.status === 404) {
@@ -86,7 +98,7 @@ async function _verifyTagExists(version) {
 }
 
 async function _createDraftReleaseOnGitHub(version, body, latest, token) {
-  const url = 'https://api.github.com/repos/react/react-native/releases';
+  const url = 'https://api.github.com/repos/facebook/react-native/releases';
   const method = 'POST';
   const headers = _headers(token);
   const fetchBody = JSON.stringify({
@@ -123,13 +135,7 @@ function moveToChangelogBranch(version) {
   run(`git checkout -b changelog/v${version}`);
 }
 
-async function createDraftRelease(
-  version,
-  latest,
-  token,
-  hermesVersion,
-  hermesV1Version,
-) {
+async function createDraftRelease(version, latest, token, hermesVersion) {
   if (version.startsWith('v')) {
     version = version.substring(1);
   }
@@ -137,7 +143,7 @@ async function createDraftRelease(
   _verifyTagExists(version);
   moveToChangelogBranch(version);
   const changelog = _extractChangelog(version);
-  const body = _computeBody(changelog, version, hermesVersion, hermesV1Version);
+  const body = _computeBody(changelog, version, hermesVersion);
   const release = await _createDraftReleaseOnGitHub(
     version,
     body,
@@ -155,4 +161,5 @@ module.exports = {
   _extractChangelog,
   _computeBody,
   _createDraftReleaseOnGitHub,
+  _readHermesVersionFromProperties,
 };

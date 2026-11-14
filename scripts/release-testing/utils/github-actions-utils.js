@@ -11,9 +11,9 @@
 
 'use strict';
 
-const {execSync: exec} = require('child_process');
 const fetch = require('node-fetch');
-const {styleText} = require('util');
+const {execSync: exec} = require('node:child_process');
+const {styleText} = require('node:util');
 
 /*::
 type CIHeaders = {
@@ -70,7 +70,7 @@ let artifacts;
 let branch;
 let baseTemporaryPath;
 
-const reactNativeRepo = 'https://api.github.com/repos/react/react-native/';
+const reactNativeRepo = 'https://api.github.com/repos/facebook/react-native/';
 const reactNativeActionsURL = `${reactNativeRepo}actions/runs`;
 
 async function _getActionRunsOnBranch() /*: Promise<WorkflowRuns> */ {
@@ -156,7 +156,7 @@ async function initialize(
 
   console.log(`\nUsing github workflow run ${testAllWorkflows[0].run_number}`);
   console.log(
-    `https://github.com/react/react-native/actions/runs/${testAllWorkflows[0].id}\n`,
+    `https://github.com/facebook/react-native/actions/runs/${testAllWorkflows[0].id}\n`,
   );
 
   let workflow = testAllWorkflows[0];
@@ -203,9 +203,7 @@ function downloadArtifact(
   exec(command, {stdio: 'inherit'});
 }
 
-async function artifactURLForRNTesterAPK(
-  emulatorArch /*: string */,
-) /*: Promise<string> */ {
+async function artifactURLForRNTesterAPK() /*: Promise<string> */ {
   return getArtifactURL('rntester-debug');
 }
 

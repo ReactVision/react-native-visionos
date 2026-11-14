@@ -11,6 +11,13 @@ import PackageDescription
 
 let BUILD_FROM_SOURCE = false
 
+// Removing the legacy TurboModule and component interop layers is opt-in while those
+// layers are still supported. Both will default to on in a future React Native release.
+let REMOVE_LEGACY_MODULE_INTEROP =
+  ProcessInfo.processInfo.environment["RCT_REMOVE_LEGACY_MODULE_INTEROP"] == "1"
+let REMOVE_LEGACY_COMPONENT_INTEROP =
+  ProcessInfo.processInfo.environment["RCT_REMOVE_LEGACY_COMPONENT_INTEROP"] == "1"
+
 /**
  This is the `Package.swift` file that allows to build React Native core using Swift PM.
  To build React Native, you need to follow these steps:
@@ -63,7 +70,9 @@ let rctDeprecation = RNTarget(
 let yoga = RNTarget(
   name: .yoga,
   path: "ReactCommon/yoga",
-  publicHeadersPath: "yoga"
+  publicHeadersPath: "yoga",
+  // Android builds Yoga at -O2 in every build type, Debug included, so match it.
+  defines: [.unsafeFlags(["-O2"])]
 )
 
 // React-oscompat.podspec
@@ -102,7 +111,7 @@ let jsi = RNTarget(
   path: "ReactCommon/jsi",
   // JSI is a part of hermes-engine. Including them also in react-native will violate the One Definition Rule.
   // Precompiled binaries are only supported with hermes - so we can safely exclude the jsi.cpp file.
-  // https://github.com/react/react-native/issues/53257
+  // https://github.com/facebook/react-native/issues/53257
   excludedPaths: ["jsi/test", "jsi/jsi.cpp", "CMakeLists.txt", "jsi/CMakeLists.txt"],
   dependencies: [.reactNativeDependencies]
 )
@@ -198,7 +207,7 @@ let reactCxxReact = RNTarget(
   path: "ReactCommon/cxxreact",
   searchPaths: [CallInvokerPath],
   excludedPaths: ["tests"],
-  dependencies: [.reactNativeDependencies, .jsi, .reactPerfLogger, .logger, .reactDebug, .reactJsInspector]
+  dependencies: [.reactNativeDependencies, .jsi, .reactPerfLogger, .logger, .reactDebug, .reactJsErrorHandler, .reactJsInspector]
 )
 
 /// React-jsitooling.podspec
@@ -212,7 +221,7 @@ let reactJsiTooling = RNTarget(
 let reactJsiExecutor = RNTarget(
   name: .reactJsiExecutor,
   path: "ReactCommon/jsiexecutor",
-  dependencies: [.reactNativeDependencies, .jsi, .reactCxxReact, .reactJsiTooling]
+  dependencies: [.reactNativeDependencies, .jsi, .reactCxxReact, .reactJsErrorHandler, .reactJsiTooling]
 )
 
 /// React-hermes.podspec
@@ -243,7 +252,7 @@ let reactPerformanceCdpMetrics = RNTarget(
   name: .reactPerformanceCdpMetrics,
   path: "ReactCommon/react/performance/cdpmetrics",
   excludedPaths: ["tests"],
-  dependencies: [.reactNativeDependencies, .reactCxxReact, .jsi, .reactPerformanceTimeline, .reactRuntimeExecutor]
+  dependencies: [.reactNativeDependencies, .jsi, .reactPerformanceTimeline, .reactRuntimeExecutor]
 )
 
 /// React-performancetimeline.podspec
@@ -251,7 +260,7 @@ let reactPerformanceTimeline = RNTarget(
   name: .reactPerformanceTimeline,
   path: "ReactCommon/react/performance/timeline",
   excludedPaths: ["tests"],
-  dependencies: [.reactNativeDependencies, .reactFeatureFlags, .reactJsInspectorTracing, .reactCxxReact, .reactPerfLogger]
+  dependencies: [.reactNativeDependencies, .reactFeatureFlags, .reactJsInspectorTracing, .reactPerfLogger]
 )
 
 /// React-runtimescheduler.podspec
@@ -259,16 +268,16 @@ let reactRuntimeScheduler = RNTarget(
   name: .reactRuntimeScheduler,
   path: "ReactCommon/react/renderer/runtimescheduler",
   excludedPaths: ["tests"],
-  dependencies: [.reactNativeDependencies, .reactFeatureFlags, .reactCxxReact, .reactPerfLogger, .reactPerformanceTimeline, .reactRendererConsistency, .reactUtils, .reactRuntimeExecutor]
+  dependencies: [.reactNativeDependencies, .reactFeatureFlags, .reactCxxReact, .reactJsErrorHandler, .reactPerfLogger, .reactPerformanceTimeline, .reactRendererConsistency, .reactUtils, .reactRuntimeExecutor]
 )
 
-/// ReactCommon.podspec
-/// This target represent the ReactCommon/turbomodule/bridging subspec
+/// React-bridging.podspec
 let reactTurboModuleBridging = RNTarget(
   name: .reactTurboModuleBridging,
   path: "ReactCommon/react/bridging",
+  searchPaths: [CallInvokerPath],
   excludedPaths: ["tests"],
-  dependencies: [.reactNativeDependencies, .reactPerfLogger, .reactCxxReact, .jsi, .logger]
+  dependencies: [.reactNativeDependencies, .jsi]
 )
 
 /// React-jserrorhandler.podspec
@@ -276,7 +285,7 @@ let reactJsErrorHandler = RNTarget(
   name: .reactJsErrorHandler,
   path: "ReactCommon/jserrorhandler",
   excludedPaths: ["tests"],
-  dependencies: [.reactNativeDependencies, .jsi, .reactCxxReact, .reactFeatureFlags, .reactDebug, .reactTurboModuleBridging]
+  dependencies: [.reactNativeDependencies, .jsi, .reactFeatureFlags, .reactDebug, .reactTurboModuleBridging]
 )
 
 /// React-graphicsApple
@@ -307,7 +316,7 @@ let reactTurboModuleCore = RNTarget(
     "ReactCommon/react/nativemodule/core/platform/ios",
   ],
   excludedPaths: ["platform/android", "iostests"],
-  dependencies: [.reactNativeDependencies, .reactDebug, .reactFeatureFlags, .reactUtils, .reactPerfLogger, .reactCxxReact, .reactTurboModuleBridging, .yoga, .reactRuntimeExecutor]
+  dependencies: [.reactNativeDependencies, .reactDebug, .reactJsErrorHandler, .reactFeatureFlags, .reactUtils, .reactPerfLogger, .reactCxxReact, .reactTurboModuleBridging, .yoga, .reactRuntimeExecutor]
 )
 
 /// React-defaultsnativemodule.podspec
@@ -350,6 +359,13 @@ let reactMutationObserverNativeModule = RNTarget(
   name: .reactMutationObserverNativeModule,
   path: "ReactCommon/react/nativemodule/mutationobserver",
   dependencies: [.reactNativeDependencies, .reactCxxReact, .reactFabric, .reactTurboModuleBridging, .reactTurboModuleCore, .yoga]
+)
+
+/// React-resizeobservernativemodule.podspec
+let reactResizeObserverNativeModule = RNTarget(
+  name: .reactResizeObserverNativeModule,
+  path: "ReactCommon/react/nativemodule/resizeobserver",
+  dependencies: [.reactNativeDependencies, .reactCxxReact, .reactFabric, .reactTurboModuleBridging, .reactTurboModuleCore, .reactGraphics, .reactGraphicsApple, .reactRuntimeScheduler, .yoga]
 )
 
 /// React-viewtransitionnativemodule.podspec
@@ -473,9 +489,11 @@ let reactFabric = RNTarget(
     "components/unimplementedview",
     "components/virtualview",
     "components/root/tests",
+    "observers/resize/tests",
+    "scheduler/tests",
   ],
   dependencies: [.reactNativeDependencies, .reactJsiExecutor, .rctTypesafety, .reactTurboModuleCore, .jsi, .logger, .reactDebug, .reactFeatureFlags, .reactUtils, .reactRuntimeScheduler, .reactCxxReact, .reactRendererDebug, .reactGraphics, .yoga, .reactJsInspectorTracing],
-  sources: ["animated", "animationbackend", "animations", "attributedstring", "core", "componentregistry", "componentregistry/native", "components/root", "components/view", "components/view/platform/cxx", "components/scrollview", "components/scrollview/platform/cxx", "components/scrollview/platform/ios", "components/legacyviewmanagerinterop", "components/legacyviewmanagerinterop/platform/ios", "dom", "scheduler", "mounting", "observers/events", "observers/intersection", "observers/mutation", "telemetry", "consistency", "leakchecker", "uimanager", "uimanager/consistency", "viewtransition"]
+  sources: ["animated", "animationbackend", "animations", "attributedstring", "core", "componentregistry", "componentregistry/native", "components/root", "components/view", "components/view/platform/cxx", "components/scrollview", "components/scrollview/platform/cxx", "components/scrollview/platform/ios", "components/legacyviewmanagerinterop", "components/legacyviewmanagerinterop/platform/ios", "dom", "scheduler", "mounting", "observers/events", "observers/intersection", "observers/mutation", "observers/resize", "telemetry", "consistency", "leakchecker", "uimanager", "uimanager/consistency", "viewtransition"]
 )
 
 let reactFabricInputAccessory = RNTarget(
@@ -625,11 +643,18 @@ let reactRCTVibration = RNTarget(
   dependencies: [.yoga, .jsi, .reactTurboModuleCore]
 )
 
+/// React-RCTAnimatedModuleProvider.podspec
+let reactRCTAnimatedModuleProvider = RNTarget(
+  name: .reactRCTAnimatedModuleProvider,
+  path: "ReactApple/RCTAnimatedModuleProvider",
+  dependencies: [.reactNativeDependencies, .jsi, .reactCore, .reactFeatureFlags, .reactFabric, .reactTurboModuleCore, .yoga, .hermesPrebuilt]
+)
+
 /// React-RCTAppDelegate.podspec
 let reactAppDelegate = RNTarget(
   name: .reactAppDelegate,
   path: "Libraries/AppDelegate",
-  dependencies: [.reactNativeDependencies, .jsi, .reactJsiExecutor, .reactRuntime, .reactRCTImage, .reactHermes, .reactCore, .reactFabric, .reactTurboModuleCore, .hermesPrebuilt, .yoga]
+  dependencies: [.reactNativeDependencies, .jsi, .reactJsiExecutor, .reactRuntime, .reactRCTImage, .reactHermes, .reactCore, .reactFabric, .reactTurboModuleCore, .reactRCTAnimatedModuleProvider, .hermesPrebuilt, .yoga]
 )
 
 /// React-RCTLinking.podspec
@@ -712,9 +737,11 @@ let targets = [
   reactWebPerformanceNativeModule,
   reactIntersectionObserverNativeModule,
   reactMutationObserverNativeModule,
+  reactResizeObserverNativeModule,
   reactViewTransitionNativeModule,
   reactFeatureflagsNativemodule,
   reactNativeModuleDom,
+  reactRCTAnimatedModuleProvider,
   reactAppDelegate,
   reactSettings,
   reactRuntimeExecutor,
@@ -724,11 +751,7 @@ let targets = [
 
 let package = Package(
   name: react,
-  platforms: [
-    .iOS(.v15),
-    .visionOS(.v1),
-    .macCatalyst(SupportedPlatform.MacCatalystVersion.v13),
-  ],
+  platforms: [.iOS(.v15), .macCatalyst(SupportedPlatform.MacCatalystVersion.v13)],
   products: [
     .library(
       name: react,
@@ -898,7 +921,8 @@ extension String {
   static let reactRCTActionSheet = "React-RCTActionSheet" // Empty target
   static let reactRCTLinking = "React-RCTLinking"
   static let reactCoreModules = "React-CoreModules"
-  static let reactTurboModuleBridging = "ReactCommon/turbomodule/bridging"
+  static let reactRCTAnimatedModuleProvider = "RCTAnimatedModuleProvider"
+  static let reactTurboModuleBridging = "React-bridging"
   static let reactTurboModuleCore = "ReactCommon/turbomodule/core"
   static let reactTurboModuleCoreDefaults = "ReactCommon/turbomodule/core/defaults"
   static let reactTurboModuleCoreMicrotasks = "ReactCommon/turbomodule/core/microtasks"
@@ -906,6 +930,7 @@ extension String {
   static let reactWebPerformanceNativeModule = "React-webperformancenativemodule"
   static let reactIntersectionObserverNativeModule = "React-intersectionobservernativemodule"
   static let reactMutationObserverNativeModule = "React-mutationobservernativemodule"
+  static let reactResizeObserverNativeModule = "React-resizeobservernativemodule"
   static let reactViewTransitionNativeModule = "React-viewtransitionnativemodule"
   static let reactFeatureflagsNativemodule = "React-featureflagsnativemodule"
   static let reactNativeModuleDom = "React-domnativemodule"
@@ -942,6 +967,14 @@ extension Target {
         CXXSetting.headerSearchPath(relativeSearchPath(numOfSlash + 1, ".build/headers/React")),
       ]
 
+    let legacyInteropDefines: [CXXSetting] =
+      (REMOVE_LEGACY_MODULE_INTEROP ? [.define("RCT_REMOVE_LEGACY_MODULE_INTEROP", to: "1")] : [])
+      + (REMOVE_LEGACY_COMPONENT_INTEROP ? [.define("RCT_REMOVE_LEGACY_COMPONENT_INTEROP", to: "1")] : [])
+
+    // Every target built through this factory is React Native's own, so RN_BUILDING
+    // keeps the react/cxxstableapi guards inert for internal sources. cxxSettings are
+    // per-target and are not inherited by packages that depend on React, so this does
+    // not exempt consumers from the guards.
     let cxxSettings =
       [
         .unsafeFlags(["-std=c++20"]),
@@ -950,7 +983,8 @@ extension Target {
         .define("USE_HERMES", to: "1"),
         .define("RCT_REMOVE_LEGACY_ARCH", to: "1"),
         .define("HERMES_V1_ENABLED", to: "1"),
-      ] + defines + cxxCommonHeaderPaths
+        .define("RN_BUILDING", to: "1"),
+      ] + legacyInteropDefines + defines + cxxCommonHeaderPaths
 
     return .target(
       name: name,

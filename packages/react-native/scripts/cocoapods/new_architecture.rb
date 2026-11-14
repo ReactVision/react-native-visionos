@@ -86,6 +86,9 @@ class NewArchitectureHelper
             ReactNativePodsUtils.create_header_search_path_for_frameworks("PODS_CONFIGURATION_BUILD_DIR", "React-graphics", "React_graphics", ["react/renderer/graphics/platform/ios"])
                 .concat(ReactNativePodsUtils.create_header_search_path_for_frameworks("PODS_CONFIGURATION_BUILD_DIR", "React-Fabric", "React_Fabric", ["react/renderer/components/view/platform/cxx"]))
                 .concat(ReactNativePodsUtils.create_header_search_path_for_frameworks("PODS_CONFIGURATION_BUILD_DIR", "React-FabricImage", "React_FabricImage", []))
+                .concat(ReactNativePodsUtils.create_header_search_path_for_frameworks("PODS_CONFIGURATION_BUILD_DIR", "React-FabricComponents", "React_FabricComponents", []))
+                .concat(ReactNativePodsUtils.create_header_search_path_for_frameworks("PODS_CONFIGURATION_BUILD_DIR", "React-Mapbuffer", "React_Mapbuffer", []))
+                .concat(ReactNativePodsUtils.create_header_search_path_for_frameworks("PODS_CONFIGURATION_BUILD_DIR", "React-RCTFBReactNativeSpec", "React_RCTFBReactNativeSpec", []))
                 .concat(ReactNativePodsUtils.create_header_search_path_for_frameworks("PODS_CONFIGURATION_BUILD_DIR", "ReactCommon", "ReactCommon", ["react/nativemodule/core"]))
                 .concat(ReactNativePodsUtils.create_header_search_path_for_frameworks("PODS_CONFIGURATION_BUILD_DIR", "React-runtimeexecutor", "React_runtimeexecutor", ["platform/ios"]))
                 .concat(ReactNativePodsUtils.create_header_search_path_for_frameworks("PODS_CONFIGURATION_BUILD_DIR", "React-NativeModulesApple", "React_NativeModulesApple", []))
@@ -96,6 +99,7 @@ class NewArchitectureHelper
                 .concat(ReactNativePodsUtils.create_header_search_path_for_frameworks("PODS_CONFIGURATION_BUILD_DIR", "React-ImageManager", "React_ImageManager", []))
                 .concat(ReactNativePodsUtils.create_header_search_path_for_frameworks("PODS_CONFIGURATION_BUILD_DIR", "React-rendererdebug", "React_rendererdebug", []))
                 .concat(ReactNativePodsUtils.create_header_search_path_for_frameworks("PODS_CONFIGURATION_BUILD_DIR", "React-renderercss", "React_renderercss", []))
+                .concat(ReactNativePodsUtils.create_header_search_path_for_frameworks("PODS_CONFIGURATION_BUILD_DIR", "React-cxxstableapi", "React_cxxstableapi", []))
                 .each { |search_path|
                     header_search_paths << "\"#{search_path}\""
                 }
@@ -119,7 +123,7 @@ class NewArchitectureHelper
 
         spec.dependency "RCTRequired"
         spec.dependency "RCTTypeSafety"
-        spec.dependency "ReactCommon/turbomodule/bridging"
+        spec.dependency "React-bridging"
         spec.dependency "ReactCommon/turbomodule/core"
         spec.dependency "React-NativeModulesApple"
         spec.dependency "Yoga"
@@ -132,6 +136,7 @@ class NewArchitectureHelper
         spec.dependency "React-rendererdebug"
         spec.dependency 'React-jsi'
         spec.dependency 'React-renderercss'
+        spec.dependency 'React-cxxstableapi'
 
         depend_on_js_engine(spec)
         add_rn_third_party_dependencies(spec)
@@ -151,17 +156,6 @@ class NewArchitectureHelper
         end
         package = json_parser.parse(file_manager.read(package_json_file))
         return package["version"]
-    end
-
-    # The version of React Native this package is based on. Its prebuilt artifacts are published by
-    # React Native under that version, not under this package's own — which moves independently.
-    def self.extract_react_native_upstream_version(react_native_path, file_manager: File, json_parser: JSON)
-        package_json_file = File.join(react_native_path, "package.json")
-        if !file_manager.exist?(package_json_file)
-            raise "Couldn't find the React Native package.json file at #{package_json_file}"
-        end
-        package = json_parser.parse(file_manager.read(package_json_file))
-        return package["reactNativeUpstreamVersion"]
     end
 
     # Deprecated method. This has been restored because some libraries (e.g. react-native-exit-app) still use it.

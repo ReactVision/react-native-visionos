@@ -19,10 +19,10 @@ const {
   removeCurlPaths,
   sanitizeSnapshots,
 } = require('./snapshot-utils');
-const fs = require('fs/promises');
-const http = require('http');
-const os = require('os');
-const path = require('path');
+const fs = require('node:fs/promises');
+const http = require('node:http');
+const os = require('node:os');
+const path = require('node:path');
 
 let server, serverUrl, tmpDir, consoleLog;
 
@@ -63,7 +63,7 @@ const octokit = {
       return {
         data: {
           id: assetId,
-          browser_download_url: `https://github.com/react/react-native/releases/download/untagged-0b602d8af97c6d3b784c/test.tar.gz`,
+          browser_download_url: `https://github.com/facebook/react-native/releases/download/untagged-0b602d8af97c6d3b784c/test.tar.gz`,
         },
       };
     }),
@@ -123,7 +123,7 @@ describe('uploadReleaseAssetsForDotSlashFile', () => {
   "platforms": {
     "linux-x86_64": {
       "providers": [
-        {"url": "https://github.com/react/react-native/releases/download/v1000.0.1/test.tar.gz"},
+        {"url": "https://github.com/facebook/react-native/releases/download/v1000.0.1/test.tar.gz"},
         {"url": "${serverUrl}"}
       ],
       "size": 0,
@@ -262,7 +262,7 @@ describe('uploadReleaseAssetsForDotSlashFile', () => {
       return {
         data: {
           id: '1',
-          browser_download_url: `https://github.com/react/react-native/releases/download/untagged-0b602d8af97c6d3b784c/test-renamed.tar.gz`,
+          browser_download_url: `https://github.com/facebook/react-native/releases/download/untagged-0b602d8af97c6d3b784c/test-renamed.tar.gz`,
         },
       };
     });

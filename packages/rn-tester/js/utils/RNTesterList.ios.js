@@ -85,6 +85,11 @@ const Components: Array<RNTesterModuleInfo> = [
     category: 'Basic',
   },
   {
+    key: 'ScrollViewMaintainVisibleContentPositionExample',
+    module: require('../examples/ScrollView/ScrollViewMaintainVisibleContentPositionExample'),
+    category: 'Basic',
+  },
+  {
     key: 'ScrollViewAnimatedExample',
     module: require('../examples/ScrollView/ScrollViewAnimatedExample'),
   },
@@ -195,10 +200,6 @@ const APIs: Array<RNTesterModuleInfo> = (
       module: require('../examples/Appearance/AppearanceExample'),
     },
     {
-      key: 'XRExample',
-      module: require('../examples/XR/XRExample'),
-    },
-    {
       key: 'AppStateExample',
       module: require('../examples/AppState/AppStateExample'),
     },
@@ -282,6 +283,11 @@ const APIs: Array<RNTesterModuleInfo> = (
       module: require('../examples/PointerEvents/PointerEventsExample'),
     },
     {
+      key: 'PushNotificationIOSExample',
+      module: require('../examples/PushNotificationIOS/PushNotificationIOSExample'),
+      category: 'iOS',
+    },
+    {
       key: 'RCTRootViewIOSExample',
       module: require('../examples/RCTRootView/RCTRootViewIOSExample'),
     },
@@ -296,6 +302,10 @@ const APIs: Array<RNTesterModuleInfo> = (
     {
       key: 'SnapshotExample',
       module: require('../examples/Snapshot/SnapshotExample'),
+    },
+    {
+      key: 'TestLibraryExample',
+      module: require('../examples/TestLibrary/TestLibraryExample'),
     },
     {
       key: 'TimerExample',
@@ -371,6 +381,17 @@ const APIs: Array<RNTesterModuleInfo> = (
             key: 'MutationObserver',
             category: 'UI',
             module: require('../examples/MutationObserver/MutationObserverIndex'),
+          },
+        ]
+      : []),
+    // Basic check to detect the availability of the ResizeObserver API.
+    // $FlowExpectedError[cannot-resolve-name]
+    ...(typeof ResizeObserver === 'function'
+      ? [
+          {
+            key: 'ResizeObserver',
+            category: 'UI',
+            module: require('../examples/ResizeObserver/ResizeObserverIndex'),
           },
         ]
       : []),

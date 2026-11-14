@@ -11,6 +11,7 @@
 
 import type {BaseVisitorState} from './visitorState';
 import type {NodePath} from '@babel/traverse';
+import type {TSType as BabelNodeTSType} from '@babel/types';
 
 import {replaceWithCleanup} from './utils';
 
@@ -18,7 +19,7 @@ const t = require('@babel/types');
 const debug = require('debug')('build-types:transforms:inlineTypes');
 
 const typeOperatorResolvers: {
-  +[K: string]: (
+  readonly [K: string]: (
     path: NodePath<t.TSTypeOperator>,
     state: BaseVisitorState,
   ) => void,

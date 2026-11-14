@@ -8,17 +8,17 @@
 #pragma once
 
 #include <FBReactNativeSpec/FBReactNativeSpecJSI.h>
+#include <folly/dynamic.h>
 #include <jserrorhandler/JsErrorHandler.h>
 #include <react/bridging/Base.h>
 #include <optional>
 #include <string>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
 namespace facebook::react {
 
-// https://github.com/react/react-native/blob/v0.71.1/Libraries/Core/NativeExceptionsManager.js#L17-L35
+// https://github.com/facebook/react-native/blob/v0.71.1/Libraries/Core/NativeExceptionsManager.js#L17-L35
 using StackFrame = NativeExceptionsManagerStackFrame<
     std::optional<int32_t>,
     std::optional<std::string>,
@@ -29,6 +29,11 @@ using StackFrame = NativeExceptionsManagerStackFrame<
 template <>
 struct Bridging<StackFrame> : NativeExceptionsManagerStackFrameBridging<StackFrame> {};
 
+// extraData is `?Object` on the JS side and callers routinely populate it with
+// non-string values (e.g. jsBuild as a number, nested Error-decorated objects
+// via RN$ErrorExtraDataKey). A flat unordered_map<string, string> would fail
+// bridging with "Value is an object, expected a String" before reportException
+// runs.
 using ExceptionData = NativeExceptionsManagerExceptionData<
     std::string,
     std::optional<std::string>,
@@ -37,7 +42,7 @@ using ExceptionData = NativeExceptionsManagerExceptionData<
     std::vector<StackFrame>,
     int32_t,
     bool,
-    std::optional<std::unordered_map<std::string, std::string>>>;
+    std::optional<folly::dynamic>>;
 
 template <>
 struct Bridging<ExceptionData> : NativeExceptionsManagerExceptionDataBridging<ExceptionData> {};
@@ -58,7 +63,7 @@ class NativeExceptionsManager : public NativeExceptionsManagerCxxSpec<NativeExce
   void updateExceptionMessage(jsi::Runtime &rt, jsi::String message, jsi::Array stack, double exceptionId)
   {
     // This method is not in modern React Native:
-    // https://github.com/search?q=repo%3Areact%2Freact-native+updateExceptionMessage&type=code
+    // https://github.com/search?q=repo%3Afacebook%2Freact-native+updateExceptionMessage&type=code
   }
 
   void dismissRedbox(jsi::Runtime &rt)

@@ -22,6 +22,7 @@
 #include <react/nativemodule/defaults/DefaultTurboModules.h>
 #include <react/nativemodule/intersectionobserver/NativeIntersectionObserver.h>
 #include <react/nativemodule/mutationobserver/NativeMutationObserver.h>
+#include <react/nativemodule/resizeobserver/NativeResizeObserver.h>
 #include <react/nativemodule/webperformance/NativePerformance.h>
 #include <react/renderer/animated/AnimatedModule.h>
 
@@ -38,7 +39,8 @@ ReactCxxTurboModuleProvider::ReactCxxTurboModuleProvider(
     std::shared_ptr<SurfaceDelegate> logBoxSurfaceDelegate,
     HttpClientFactory httpClientFactory,
     WebSocketClientFactory webSocketClientFactory,
-    std::function<void()> liveReloadCallback)
+    std::function<void()> liveReloadCallback,
+    std::shared_ptr<std::string> sourceURL)
     : turboModuleProviders_(std::move(turboModuleProviders)),
       jsInvoker_(std::move(jsInvoker)),
       onJsError_(std::move(onJsError)),
@@ -48,7 +50,8 @@ ReactCxxTurboModuleProvider::ReactCxxTurboModuleProvider(
       logBoxSurfaceDelegate_(std::move(logBoxSurfaceDelegate)),
       httpClientFactory_(std::move(httpClientFactory)),
       webSocketClientFactory_(std::move(webSocketClientFactory)),
-      liveReloadCallback_(std::move(liveReloadCallback)) {}
+      liveReloadCallback_(std::move(liveReloadCallback)),
+      sourceURL_(std::move(sourceURL)) {}
 
 std::shared_ptr<TurboModule> ReactCxxTurboModuleProvider::operator()(
     const std::string& name) const {
@@ -82,7 +85,8 @@ std::shared_ptr<TurboModule> ReactCxxTurboModuleProvider::operator()(
   } else if (name == ImageLoaderModule::kModuleName) {
     return std::make_shared<ImageLoaderModule>(jsInvoker_);
   } else if (name == SourceCodeModule::kModuleName) {
-    return std::make_shared<SourceCodeModule>(jsInvoker_, devServerHelper_);
+    return std::make_shared<SourceCodeModule>(
+        jsInvoker_, sourceURL_ ? *sourceURL_ : "");
   } else if (name == WebSocketModule::kModuleName) {
     return std::make_shared<WebSocketModule>(
         jsInvoker_, webSocketClientFactory_);
@@ -92,6 +96,8 @@ std::shared_ptr<TurboModule> ReactCxxTurboModuleProvider::operator()(
     return std::make_shared<NativeIntersectionObserver>(jsInvoker_);
   } else if (name == NativeMutationObserver::kModuleName) {
     return std::make_shared<NativeMutationObserver>(jsInvoker_);
+  } else if (name == NativeResizeObserver::kModuleName) {
+    return std::make_shared<NativeResizeObserver>(jsInvoker_);
   } else if (name == NetworkingModule::kModuleName) {
     return std::make_shared<NetworkingModule>(jsInvoker_, httpClientFactory_);
   } else if (name == LogBoxModule::kModuleName) {

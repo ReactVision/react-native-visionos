@@ -12,38 +12,16 @@
 export type Platform =
   'ios' |
   'ios-simulator' |
-  'visionos' |
-  'visionos-simulator' |
   'mac-catalyst';
 
 export type Destination =
   'iOS' |
   'iOS Simulator' |
-  'visionOS' |
-  'visionOS Simulator' |
   'macOS,variant=Mac Catalyst';
 
 export type BuildFlavor = 'Debug' | 'Release';
 
 export type MavenSubGroup = 'hermes' | 'react';
-
-export type VFSEntry = {
-  name: string,
-  type: 'file' | 'directory',
-  'external-contents'?: string,
-  contents?: Array<VFSEntry>,
-};
-
-export type VFSOverlay = {
-  version: number,
-  'case-sensitive': boolean,
-  roots: Array<VFSEntry>,
-};
-
-export type HeaderMapping = {
-  key: string,
-  path: string,
-};
 */
 
 module.exports = {};

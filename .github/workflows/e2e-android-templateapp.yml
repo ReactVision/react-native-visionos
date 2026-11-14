@@ -9,14 +9,17 @@ on:
       fail-on-error:
         type: boolean
         default: false
+      retry-attempt:
+        type: number
+        default: 0
     outputs:
       status:
-        description: "The result of the E2E tests (success or failure)"
+        description: 'The result of the E2E tests (success or failure)'
         value: ${{ jobs.report.outputs.status }}
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: 4-core-ubuntu
     outputs:
       status: ${{ steps.report-status.outputs.status }}
     strategy:
@@ -56,11 +59,9 @@ jobs:
           MAVEN_LOCAL=/tmp/react-native-tmp/maven-local
           echo "Maven local path is $MAVEN_LOCAL"
 
-          # For stable branches, we want to use the stable branch of the template.
-          # In all the other cases, we want to use "main".
-          # On pull_request events, ref_name is "<pr-number>/merge", so use the
-          # PR base branch instead to keep targeting the matching template branch.
-          BRANCH=${{ github.base_ref || github.ref_name }}
+          # For stable branches, we want to use the stable branch of the template
+          # In all the other cases, we want to use "main"
+          BRANCH=${{ github.ref_name }}
           if ! [[ $BRANCH == *-stable* ]]; then
             BRANCH=main
           fi
@@ -68,18 +69,39 @@ jobs:
 
           echo "Feed maven local to gradle.properties"
           cd /tmp/RNTestProject
-          echo "react.internal.mavenLocalRepo=$MAVEN_LOCAL" >> android/gradle.properties
+          echo -e "\nreact.internal.mavenLocalRepo=$MAVEN_LOCAL" >> android/gradle.properties
 
           # Build
           cd android
           CAPITALIZED_FLAVOR=$(echo "${{ matrix.flavor }}" | awk '{print toupper(substr($0, 1, 1)) substr($0, 2)}')
-          ./gradlew assemble$CAPITALIZED_FLAVOR --no-daemon -PreactNativeArchitectures=x86
+          ./gradlew --no-daemon \
+            --init-script "$GITHUB_WORKSPACE/.github/workflow-scripts/legacy-jni-packaging.gradle" \
+            assemble$CAPITALIZED_FLAVOR \
+            -PreactNativeArchitectures=arm64-v8a
 
+      - name: Download previous per-flow test state
+        if: ${{ inputs.retry-attempt > 0 }}
+        continue-on-error: true
+        uses: actions/download-artifact@v7
+        with:
+          name: e2e_android_templateapp_state_${{ matrix.flavor }}_arm64-v8a_NewArch
+          path: /tmp/maestro-android-state
+      - name: Check for unfinished E2E flows
+        id: test-state
+        shell: bash
+        run: |
+          SHOULD_RUN=true
+          if [[ -f /tmp/maestro-android-state/results.json ]] && \
+            jq -e '(.flows | length > 0) and all(.flows[]; .status == "passed")' /tmp/maestro-android-state/results.json > /dev/null; then
+            SHOULD_RUN=false
+          fi
+          echo "should-run=$SHOULD_RUN" >> "$GITHUB_OUTPUT"
       - name: Run E2E Tests
         id: run-tests
+        if: steps.test-state.outputs.should-run == 'true'
         continue-on-error: true
         uses: ./.github/actions/maestro-android
-        timeout-minutes: 60
+        timeout-minutes: 90
         with:
           app-path: /tmp/RNTestProject/android/app/build/outputs/apk/${{ matrix.flavor }}/app-${{ matrix.flavor }}.apk
           app-id: com.rntestproject
@@ -87,6 +109,17 @@ jobs:
           install-java: 'false'
           flavor: ${{ matrix.flavor }}
           working-directory: /tmp/RNTestProject
+          emulator-api-level: '35'
+          emulator-target: google_apis
+          emulator-arch: x86_64
+      - name: Store per-flow test state
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: e2e_android_templateapp_state_${{ matrix.flavor }}_arm64-v8a_NewArch
+          overwrite: true
+          if-no-files-found: warn
+          path: /tmp/maestro-android-state/results.json
       - name: Report status
         id: report-status
         if: ${{ always() && steps.run-tests.outcome == 'failure' }}

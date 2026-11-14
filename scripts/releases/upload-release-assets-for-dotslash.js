@@ -21,9 +21,9 @@ const {
   FIRST_PARTY_DOTSLASH_FILES,
 } = require('./write-dotslash-release-asset-urls');
 const {Octokit} = require('@octokit/rest');
+const path = require('node:path');
+const {parseArgs} = require('node:util');
 const nullthrows = require('nullthrows');
-const path = require('path');
-const {parseArgs} = require('util');
 
 // Upload POSTs are not preserved when GitHub redirects from the former owner.
 const GITHUB_OWNER = 'react';
@@ -184,7 +184,7 @@ async function uploadReleaseAssetsForDotSlashFile(
  * Given a description of a DotSlash artifact for a particular platform,
  * infers the upstream URL ( = where the binary is currently available) and
  * release asset URL ( = where the binary will be hosted after the release),
- * then downloads the asset from the the upstream URL and uploads it to GitHub
+ * then downloads the asset from the upstream URL and uploads it to GitHub
  * at the desired URL.
  */
 async function fetchUpstreamAssetAndUploadToRelease(
@@ -276,7 +276,7 @@ function parseReleaseAssetInfo(
     url: string,
   }
 */ {
-  const releaseAssetPrefix = `https://github.com/react/react-native/releases/download/${encodeURIComponent(releaseTag)}/`;
+  const releaseAssetPrefix = `https://github.com/facebook/react-native/releases/download/${encodeURIComponent(releaseTag)}/`;
 
   if (isHttpProvider(provider) && provider.url.startsWith(releaseAssetPrefix)) {
     return {

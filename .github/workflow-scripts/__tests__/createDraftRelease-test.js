@@ -38,7 +38,7 @@ describe('Create Draft Release', () => {
       );
       expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://github.com/react/react-native/releases/tag/v0.77.1',
+        'https://github.com/facebook/react-native/releases/tag/v0.77.1',
       );
     });
   });
@@ -49,39 +49,39 @@ describe('Create Draft Release', () => {
 
 ## v0.77.2
 
-- [PR #1234](https://github.com/react/react-native/pull/1234) - Some change
-- [PR #5678](https://github.com/react/react-native/pull/5678) - Some other change
+- [PR #1234](https://github.com/facebook/react-native/pull/1234) - Some change
+- [PR #5678](https://github.com/facebook/react-native/pull/5678) - Some other change
 
 
 ## v0.77.1
 ### Breaking Changes
-- [PR #9012](https://github.com/react/react-native/pull/9012) - Some other change
+- [PR #9012](https://github.com/facebook/react-native/pull/9012) - Some other change
 
 #### Android
-- [PR #3456](https://github.com/react/react-native/pull/3456) - Some other change
-- [PR #3457](https://github.com/react/react-native/pull/3457) - Some other change
+- [PR #3456](https://github.com/facebook/react-native/pull/3456) - Some other change
+- [PR #3457](https://github.com/facebook/react-native/pull/3457) - Some other change
 
 #### iOS
-- [PR #3436](https://github.com/react/react-native/pull/3436) - Some other change
-- [PR #3437](https://github.com/react/react-native/pull/3437) - Some other change
+- [PR #3436](https://github.com/facebook/react-native/pull/3436) - Some other change
+- [PR #3437](https://github.com/facebook/react-native/pull/3437) - Some other change
 
 ### Fixed
-- [PR #9012](https://github.com/react/react-native/pull/9012) - Some other change
+- [PR #9012](https://github.com/facebook/react-native/pull/9012) - Some other change
 
 #### Android
-- [PR #3456](https://github.com/react/react-native/pull/3456) - Some other change
+- [PR #3456](https://github.com/facebook/react-native/pull/3456) - Some other change
 
 #### iOS
-- [PR #3437](https://github.com/react/react-native/pull/3437) - Some other change
+- [PR #3437](https://github.com/facebook/react-native/pull/3437) - Some other change
 
 
 ## v0.77.0
 
-- [PR #3456](https://github.com/react/react-native/pull/3456) - Some other change
+- [PR #3456](https://github.com/facebook/react-native/pull/3456) - Some other change
 
 ## v0.76.0
 
-- [PR #7890](https://github.com/react/react-native/pull/7890) - Some other change`;
+- [PR #7890](https://github.com/facebook/react-native/pull/7890) - Some other change`;
 
       jest.spyOn(fs, 'readFileSync').mockImplementationOnce(func => {
         return mockedReturnValue;
@@ -89,24 +89,24 @@ describe('Create Draft Release', () => {
       const changelog = _extractChangelog('0.77.1');
       expect(changelog).toEqual(`## v0.77.1
 ### Breaking Changes
-- [PR #9012](https://github.com/react/react-native/pull/9012) - Some other change
+- [PR #9012](https://github.com/facebook/react-native/pull/9012) - Some other change
 
 #### Android
-- [PR #3456](https://github.com/react/react-native/pull/3456) - Some other change
-- [PR #3457](https://github.com/react/react-native/pull/3457) - Some other change
+- [PR #3456](https://github.com/facebook/react-native/pull/3456) - Some other change
+- [PR #3457](https://github.com/facebook/react-native/pull/3457) - Some other change
 
 #### iOS
-- [PR #3436](https://github.com/react/react-native/pull/3436) - Some other change
-- [PR #3437](https://github.com/react/react-native/pull/3437) - Some other change
+- [PR #3436](https://github.com/facebook/react-native/pull/3436) - Some other change
+- [PR #3437](https://github.com/facebook/react-native/pull/3437) - Some other change
 
 ### Fixed
-- [PR #9012](https://github.com/react/react-native/pull/9012) - Some other change
+- [PR #9012](https://github.com/facebook/react-native/pull/9012) - Some other change
 
 #### Android
-- [PR #3456](https://github.com/react/react-native/pull/3456) - Some other change
+- [PR #3456](https://github.com/facebook/react-native/pull/3456) - Some other change
 
 #### iOS
-- [PR #3437](https://github.com/react/react-native/pull/3437) - Some other change`);
+- [PR #3437](https://github.com/facebook/react-native/pull/3437) - Some other change`);
     });
 
     it('does not extract changelog for rc.0', async () => {
@@ -121,40 +121,40 @@ describe('Create Draft Release', () => {
   });
 
   describe('#_computeBody', () => {
-    it('computes body for release when no hermes versions are passed', async () => {
+    it('falls back to HERMES_VERSION_NAME from version.properties when no hermes version is passed', async () => {
       const version = '0.77.1';
+      const hermesVersion = '250829098.0.13';
+      jest.spyOn(fs, 'readFileSync').mockImplementationOnce(() => {
+        return `HERMES_VERSION_NAME=${hermesVersion}\n`;
+      });
       const changelog = `## v${version}
 ### Breaking Changes
-- [PR #9012](https://github.com/react/react-native/pull/9012) - Some other change
+- [PR #9012](https://github.com/facebook/react-native/pull/9012) - Some other change
 
 #### Android
-- [PR #3456](https://github.com/react/react-native/pull/3456) - Some other change
-- [PR #3457](https://github.com/react/react-native/pull/3457) - Some other change
+- [PR #3456](https://github.com/facebook/react-native/pull/3456) - Some other change
+- [PR #3457](https://github.com/facebook/react-native/pull/3457) - Some other change
 
 #### iOS
-- [PR #3436](https://github.com/react/react-native/pull/3436) - Some other change
-- [PR #3437](https://github.com/react/react-native/pull/3437) - Some other change`;
+- [PR #3436](https://github.com/facebook/react-native/pull/3436) - Some other change
+- [PR #3437](https://github.com/facebook/react-native/pull/3437) - Some other change`;
       const body = _computeBody(changelog, version);
 
       expect(body).toEqual(`${changelog}
 
 ---
 
-Hermes dSYMS:
-- [Debug](https://repo1.maven.org/maven2/com/facebook/hermes/hermes-ios/${version}/hermes-ios-${version}-hermes-framework-dSYM-debug.tar.gz)
-- [Release](https://repo1.maven.org/maven2/com/facebook/hermes/hermes-ios/${version}/hermes-ios-${version}-hermes-framework-dSYM-release.tar.gz)
-
 Hermes V1 dSYMS:
-- [Debug](https://repo1.maven.org/maven2/com/facebook/hermes/hermes-ios/${version}/hermes-ios-${version}-hermes-framework-dSYM-debug.tar.gz)
-- [Release](https://repo1.maven.org/maven2/com/facebook/hermes/hermes-ios/${version}/hermes-ios-${version}-hermes-framework-dSYM-release.tar.gz)
+- [Debug](https://repo1.maven.org/maven2/com/facebook/hermes/hermes-ios/${hermesVersion}/hermes-ios-${hermesVersion}-hermes-framework-dSYM-debug.tar.gz)
+- [Release](https://repo1.maven.org/maven2/com/facebook/hermes/hermes-ios/${hermesVersion}/hermes-ios-${hermesVersion}-hermes-framework-dSYM-release.tar.gz)
 
 ReactNativeDependencies dSYMs:
 - [Debug](https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/${version}/react-native-artifacts-${version}-reactnative-dependencies-dSYM-debug.tar.gz)
 - [Release](https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/${version}/react-native-artifacts-${version}-reactnative-dependencies-dSYM-release.tar.gz)
 
 ReactNative Core dSYMs:
-- [Debug](https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/${version}/react-native-artifacts-${version}-reactnative-core-debug.tar.gz)
-- [Release](https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/${version}/react-native-artifacts-${version}-reactnative-core-release.tar.gz)
+- [Debug](https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/${version}/react-native-artifacts-${version}-reactnative-core-dSYM-debug.tar.gz)
+- [Release](https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/${version}/react-native-artifacts-${version}-reactnative-core-dSYM-release.tar.gz)
 
 ---
 
@@ -166,50 +166,40 @@ To help you upgrade to this version, you can use the [Upgrade Helper](https://re
 
 ---
 
-View the whole changelog in the [CHANGELOG.md file](https://github.com/react/react-native/blob/main/CHANGELOG.md).`);
+View the whole changelog in the [CHANGELOG.md file](https://github.com/facebook/react-native/blob/main/CHANGELOG.md).`);
     });
 
     it('computes body for release when hermes versions are passed', async () => {
       const version = '0.77.1';
       const hermesVersion = '0.15.0';
-      const hermesV1Version = '250829098.0.2';
       const changelog = `## v${version}
 ### Breaking Changes
-- [PR #9012](https://github.com/react/react-native/pull/9012) - Some other change
+- [PR #9012](https://github.com/facebook/react-native/pull/9012) - Some other change
 
 #### Android
-- [PR #3456](https://github.com/react/react-native/pull/3456) - Some other change
-- [PR #3457](https://github.com/react/react-native/pull/3457) - Some other change
+- [PR #3456](https://github.com/facebook/react-native/pull/3456) - Some other change
+- [PR #3457](https://github.com/facebook/react-native/pull/3457) - Some other change
 
 #### iOS
-- [PR #3436](https://github.com/react/react-native/pull/3436) - Some other change
-- [PR #3437](https://github.com/react/react-native/pull/3437) - Some other change`;
-      const body = _computeBody(
-        changelog,
-        version,
-        hermesVersion,
-        hermesV1Version,
-      );
+- [PR #3436](https://github.com/facebook/react-native/pull/3436) - Some other change
+- [PR #3437](https://github.com/facebook/react-native/pull/3437) - Some other change`;
+      const body = _computeBody(changelog, version, hermesVersion);
 
       expect(body).toEqual(`${changelog}
 
 ---
 
-Hermes dSYMS:
+Hermes V1 dSYMS:
 - [Debug](https://repo1.maven.org/maven2/com/facebook/hermes/hermes-ios/${hermesVersion}/hermes-ios-${hermesVersion}-hermes-framework-dSYM-debug.tar.gz)
 - [Release](https://repo1.maven.org/maven2/com/facebook/hermes/hermes-ios/${hermesVersion}/hermes-ios-${hermesVersion}-hermes-framework-dSYM-release.tar.gz)
-
-Hermes V1 dSYMS:
-- [Debug](https://repo1.maven.org/maven2/com/facebook/hermes/hermes-ios/${hermesV1Version}/hermes-ios-${hermesV1Version}-hermes-framework-dSYM-debug.tar.gz)
-- [Release](https://repo1.maven.org/maven2/com/facebook/hermes/hermes-ios/${hermesV1Version}/hermes-ios-${hermesV1Version}-hermes-framework-dSYM-release.tar.gz)
 
 ReactNativeDependencies dSYMs:
 - [Debug](https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/${version}/react-native-artifacts-${version}-reactnative-dependencies-dSYM-debug.tar.gz)
 - [Release](https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/${version}/react-native-artifacts-${version}-reactnative-dependencies-dSYM-release.tar.gz)
 
 ReactNative Core dSYMs:
-- [Debug](https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/${version}/react-native-artifacts-${version}-reactnative-core-debug.tar.gz)
-- [Release](https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/${version}/react-native-artifacts-${version}-reactnative-core-release.tar.gz)
+- [Debug](https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/${version}/react-native-artifacts-${version}-reactnative-core-dSYM-debug.tar.gz)
+- [Release](https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/${version}/react-native-artifacts-${version}-reactnative-core-dSYM-release.tar.gz)
 
 ---
 
@@ -221,14 +211,14 @@ To help you upgrade to this version, you can use the [Upgrade Helper](https://re
 
 ---
 
-View the whole changelog in the [CHANGELOG.md file](https://github.com/react/react-native/blob/main/CHANGELOG.md).`);
+View the whole changelog in the [CHANGELOG.md file](https://github.com/facebook/react-native/blob/main/CHANGELOG.md).`);
     });
   });
 
   describe('#_createDraftReleaseOnGitHub', () => {
     it('creates a draft release on GitHub', async () => {
       const version = '0.77.1';
-      const url = 'https://api.github.com/repos/react/react-native/releases';
+      const url = 'https://api.github.com/repos/facebook/react-native/releases';
       const token = 'token';
       const headers = {
         Accept: 'Accept: application/vnd.github+json',
@@ -253,7 +243,7 @@ View the whole changelog in the [CHANGELOG.md file](https://github.com/react/rea
             Promise.resolve({
               id: 1,
               html_url:
-                'https://github.com/react/react-native/releases/tag/v0.77.1',
+                'https://github.com/facebook/react-native/releases/tag/v0.77.1',
             }),
         }),
       );
@@ -265,7 +255,7 @@ View the whole changelog in the [CHANGELOG.md file](https://github.com/react/rea
       );
       expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(mockFetch).toHaveBeenCalledWith(
-        `https://api.github.com/repos/react/react-native/releases`,
+        `https://api.github.com/repos/facebook/react-native/releases`,
         {
           method: 'POST',
           headers: headers,
@@ -274,13 +264,14 @@ View the whole changelog in the [CHANGELOG.md file](https://github.com/react/rea
       );
       expect(response).toEqual({
         id: 1,
-        html_url: 'https://github.com/react/react-native/releases/tag/v0.77.1',
+        html_url:
+          'https://github.com/facebook/react-native/releases/tag/v0.77.1',
       });
     });
 
     it('creates a draft release for prerelease on GitHub', async () => {
       const version = '0.77.0-rc.2';
-      const url = 'https://api.github.com/repos/react/react-native/releases';
+      const url = 'https://api.github.com/repos/facebook/react-native/releases';
       const token = 'token';
       const headers = {
         Accept: 'Accept: application/vnd.github+json',
@@ -305,7 +296,7 @@ View the whole changelog in the [CHANGELOG.md file](https://github.com/react/rea
             Promise.resolve({
               id: 1,
               html_url:
-                'https://github.com/react/react-native/releases/tag/v0.77.1',
+                'https://github.com/facebook/react-native/releases/tag/v0.77.1',
             }),
         }),
       );
@@ -317,7 +308,7 @@ View the whole changelog in the [CHANGELOG.md file](https://github.com/react/rea
       );
       expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(mockFetch).toHaveBeenCalledWith(
-        `https://api.github.com/repos/react/react-native/releases`,
+        `https://api.github.com/repos/facebook/react-native/releases`,
         {
           method: 'POST',
           headers: headers,
@@ -326,13 +317,14 @@ View the whole changelog in the [CHANGELOG.md file](https://github.com/react/rea
       );
       expect(response).toEqual({
         id: 1,
-        html_url: 'https://github.com/react/react-native/releases/tag/v0.77.1',
+        html_url:
+          'https://github.com/facebook/react-native/releases/tag/v0.77.1',
       });
     });
 
     it('throws if the post failes', async () => {
       const version = '0.77.0-rc.2';
-      const url = 'https://api.github.com/repos/react/react-native/releases';
+      const url = 'https://api.github.com/repos/facebook/react-native/releases';
       const token = 'token';
       const headers = {
         Accept: 'Accept: application/vnd.github+json',
@@ -360,7 +352,7 @@ View the whole changelog in the [CHANGELOG.md file](https://github.com/react/rea
       ).rejects.toThrowError();
       expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(mockFetch).toHaveBeenCalledWith(
-        `https://api.github.com/repos/react/react-native/releases`,
+        `https://api.github.com/repos/facebook/react-native/releases`,
         {
           method: 'POST',
           headers: headers,

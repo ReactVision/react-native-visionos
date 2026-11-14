@@ -5,7 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  *
  * @flow strict-local
- * @fantom_flags enableNativeCSSParsing:* enableNativeViewPropTransformations:*
+ * @fantom_flags enableNativeCSSParsing:*
+ * @fantom_flags enableCppPropsIteratorSetter:*
  * @format
  */
 
@@ -13,14 +14,17 @@ import '@react-native/fantom/src/setUpDefaultReactNativeEnvironment';
 
 import type {HostInstance} from 'react-native';
 
-import ensureInstance from '../../../../src/private/__tests__/utilities/ensureInstance';
 import * as Fantom from '@react-native/fantom';
+import nullthrows from 'nullthrows';
 import * as React from 'react';
 import {createRef} from 'react';
 import {View} from 'react-native';
-import ReactNativeElement from 'react-native/src/private/webapis/dom/nodes/ReactNativeElement';
 
 describe('<View>', () => {
+  it('has displayName', () => {
+    expect(View.displayName ?? View.name).toBe('View');
+  });
+
   describe('props', () => {
     describe('style', () => {
       describe('width and height style', () => {
@@ -217,10 +221,7 @@ describe('<View>', () => {
               );
             });
 
-            const viewElement = ensureInstance(
-              viewRef.current,
-              ReactNativeElement,
-            );
+            const viewElement = nullthrows(viewRef.current);
 
             const viewBounds = viewElement.getBoundingClientRect();
             expect(viewBounds.x).toBe(expectedBounds.x);
@@ -335,13 +336,12 @@ describe('<View>', () => {
               <>
                 <View
                   style={{
-                    experimental_backgroundImage:
-                      'radial-gradient(#e66465, #9198e5)',
+                    backgroundImage: 'radial-gradient(#e66465, #9198e5)',
                   }}
                 />
                 <View
                   style={{
-                    experimental_backgroundImage: [
+                    backgroundImage: [
                       {
                         type: 'radial-gradient',
                         shape: 'ellipse',
@@ -1091,6 +1091,20 @@ describe('<View>', () => {
     });
   });
 
+  describe('testID', () => {
+    it('is propagated to the mounting layer', () => {
+      const root = Fantom.createRoot();
+
+      Fantom.runTask(() => {
+        root.render(<View testID="testID" collapsable={false} />);
+      });
+
+      expect(root.getRenderedOutput({props: ['testID']}).toJSX()).toEqual(
+        <rn-view testID="testID" />,
+      );
+    });
+  });
+
   describe('ref', () => {
     it('is an element node', () => {
       const elementRef = createRef<HostInstance>();
@@ -1101,7 +1115,7 @@ describe('<View>', () => {
         root.render(<View ref={elementRef} />);
       });
 
-      expect(elementRef.current).toBeInstanceOf(ReactNativeElement);
+      expect(elementRef.current).toBeInstanceOf(HTMLElement);
     });
 
     it('uses the "RN:View" tag name', () => {
@@ -1113,7 +1127,7 @@ describe('<View>', () => {
         root.render(<View ref={elementRef} />);
       });
 
-      const element = ensureInstance(elementRef.current, ReactNativeElement);
+      const element = nullthrows(elementRef.current);
       expect(element.tagName).toBe('RN:View');
     });
   });

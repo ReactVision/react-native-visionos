@@ -20,7 +20,7 @@ import type {
   Page,
   PageDescription,
 } from './types';
-import type {IncomingMessage, ServerResponse} from 'http';
+import type {IncomingMessage, ServerResponse} from 'node:http';
 
 import getBaseUrlFromRequest from '../utils/getBaseUrlFromRequest';
 import getDevToolsFrontendUrl from '../utils/getDevToolsFrontendUrl';
@@ -93,7 +93,7 @@ export default class InspectorProxy implements InspectorProxyQueries {
 
   #eventReporter: ?EventReporter;
 
-  +#experiments: Experiments;
+  readonly #experiments: Experiments;
 
   // custom message handler factory allowing implementers to handle unsupported CDP messages.
   #customMessageHandler: ?CreateCustomMessageHandlerFn;

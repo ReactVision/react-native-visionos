@@ -14,9 +14,9 @@ const {
   prepareAppDependenciesHeaders,
   symlinkReactNativeHeaders,
 } = require('./prepare-app-dependencies-headers');
-const {execSync} = require('child_process');
-const fs = require('fs');
-const path = require('path');
+const {execSync} = require('node:child_process');
+const fs = require('node:fs');
+const path = require('node:path');
 
 /**
  * Find the directory containing the Xcode project within the app path
@@ -73,12 +73,12 @@ async function runPodDeintegrate(
 async function runIosPrebuild(
   reactNativePath /*: string */,
 ) /*: Promise<void> */ {
-  console.log('Running iOS prebuild with nightly versions...');
+  console.log('Running iOS prebuild with prebuilt versions...');
 
   const env = {
     ...process.env,
     RN_DEP_VERSION: 'nightly',
-    HERMES_VERSION: 'nightly',
+    HERMES_VERSION: 'latest-v1',
   };
 
   try {

@@ -430,7 +430,7 @@ RCT_EXPORT_MODULE()
   return items;
 }
 
-RCT_EXPORT_METHOD(show)
+- (void)show
 {
   if ((_actionSheet != nullptr) || RCTRunningInAppExtension() || !_devMenuEnabled) {
     return;
@@ -473,15 +473,9 @@ RCT_EXPORT_METHOD(show)
 {
   return ^(__unused UIAlertAction *action) {
     if (item != nullptr) {
-#if TARGET_OS_VISION
-      /// Execute this handler after the action sheet is dismissed to properly retrieve window when using SwiftUI entry point.
-      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0), dispatch_get_main_queue(), ^{
-        [item callHandler];
-      });
-#else
       [item callHandler];
-#endif
     }
+
     self->_actionSheet = nil;
   };
 }
@@ -501,13 +495,13 @@ RCT_EXPORT_METHOD(show)
   return ((RCTDevSettings *)[_moduleRegistry moduleForName:"DevSettings"]).isShakeToShowDevMenuEnabled;
 }
 
-RCT_EXPORT_METHOD(reload)
+- (void)reload
 {
   WARN_DEPRECATED_DEV_MENU_EXPORT();
   RCTTriggerReloadCommandListeners(@"Unknown from JS");
 }
 
-RCT_EXPORT_METHOD(setProfilingEnabled : (BOOL)enabled)
+- (void)setProfilingEnabled:(BOOL)enabled
 {
   WARN_DEPRECATED_DEV_MENU_EXPORT();
   ((RCTDevSettings *)[_moduleRegistry moduleForName:"DevSettings"]).isProfilingEnabled = enabled;
@@ -518,7 +512,7 @@ RCT_EXPORT_METHOD(setProfilingEnabled : (BOOL)enabled)
   return ((RCTDevSettings *)[_moduleRegistry moduleForName:"DevSettings"]).isProfilingEnabled;
 }
 
-RCT_EXPORT_METHOD(setHotLoadingEnabled : (BOOL)enabled)
+- (void)setHotLoadingEnabled:(BOOL)enabled
 {
   WARN_DEPRECATED_DEV_MENU_EXPORT();
   ((RCTDevSettings *)[_moduleRegistry moduleForName:"DevSettings"]).isHotLoadingEnabled = enabled;
