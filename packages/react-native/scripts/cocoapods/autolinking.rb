@@ -38,8 +38,22 @@ def list_native_modules!(config_command)
   config = JSON.parse(json)
 
   packages = config["dependencies"]
-  ios_project_root = Pathname.new(config["project"]["ios"]["sourceDir"])
   react_native_path = Pathname.new(config["reactNativePath"])
+
+  # Anchor everything to the Podfile being installed, not to the iOS one.
+  #
+  # `config["project"]["ios"]["sourceDir"]` is always `<app>/ios`, even when CocoaPods is
+  # installing in `visionos/`. Codegen looks for the manifest under the installation root, found
+  # nothing there, and fell back to scanning the app's package.json — where `react-native` and
+  # `@reactvision/react-native-visionos` both declare AccessibilityManager, Appearance, AppState,
+  # DeviceInfo, PlatformConstants and StatusBarManager, because the fork *is* React Native. The
+  # install then died on "declared in more than one libraries". Podspec paths below are relative
+  # to this root too, and want the same answer.
+  #
+  # For an iOS install the two are the same directory, so nothing changes there.
+  install_root = Pod::Config.instance.installation_root
+  ios_project_root = install_root ? Pathname.new(install_root.to_s)
+                                  : Pathname.new(config["project"]["ios"]["sourceDir"])
   codegen_output_path = ios_project_root.join("build/generated/autolinking/autolinking.json")
 
   # Write autolinking react-native-config output to codegen folder

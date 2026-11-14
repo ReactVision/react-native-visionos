@@ -491,6 +491,19 @@ declare const VirtualizedSectionListComponent_default: <
     }>
   },
 ) => React.ReactNode
+declare const WindowManager: typeof WindowManager_default
+declare const WindowManager_default: {
+  getWindow: (id: string) => Window
+  get supportsMultipleScenes(): boolean
+}
+declare const XR: typeof XR_default
+declare const XR_default: {
+  endSession: () => Promise<void>
+  requestSession: (
+    sessionId: string,
+    userInfo: null | Object | undefined,
+  ) => Promise<void>
+}
 declare type ____BlendMode_Internal =
   | "color-burn"
   | "color-dodge"
@@ -2889,7 +2902,7 @@ declare class LinkingImpl extends NativeEventEmitter<LinkingEventDefinitions> {
 declare class ListMetricsAggregator_default {
   cartesianOffset(flowRelativeOffset: number): number
   flowRelativeOffset(
-    layout: LayoutRectangle,
+    layout: LayoutRectangle_2,
     referenceContentLength?: null | number | undefined,
   ): number
   getAverageCellLength(): number
@@ -2905,7 +2918,7 @@ declare class ListMetricsAggregator_default {
   notifyCellLayout($$PARAM_0$$: {
     cellIndex: number
     cellKey: string
-    layout: LayoutRectangle
+    layout: LayoutRectangle_2
     orientation: ListOrientation
   }): boolean
   notifyCellUnmounted(cellKey: string): void
@@ -3335,9 +3348,9 @@ declare type OptionalVirtualizedListProps = {
   keyExtractor?: (item: Item, index: number) => string
   ListEmptyComponent?: React.ComponentType<any> | React.JSX.Element
   ListFooterComponent?: React.ComponentType<any> | React.JSX.Element
-  ListFooterComponentStyle?: StyleProp<ViewStyle>
+  ListFooterComponentStyle?: StyleProp_2<ViewStyle_2>
   ListHeaderComponent?: React.ComponentType<any> | React.JSX.Element
-  ListHeaderComponentStyle?: StyleProp<ViewStyle>
+  ListHeaderComponentStyle?: StyleProp_2<ViewStyle_2>
   ListItemComponent?: React.ComponentType<any> | React.JSX.Element
   maxToRenderPerBatch?: number
   onEndReached?: (info: { distanceFromEnd: number }) => void
@@ -3851,13 +3864,13 @@ declare type RCTNetworkingEventDefinitions = {
 }
 declare type ReactFabricType = {
   dispatchCommand(
-    handle: HostInstance,
+    handle: HostInstance_2,
     command: string,
     args: Array<unknown>,
   ): void
   findHostInstance_DEPRECATED<TElementType extends React.ElementType>(
     componentOrHandle: (number | React.ComponentRef<TElementType>) | undefined,
-  ): HostInstance | undefined
+  ): HostInstance_2 | undefined
   findNodeHandle<TElementType extends React.ElementType>(
     componentOrHandle: (number | React.ComponentRef<TElementType>) | undefined,
   ): number | undefined
@@ -3866,9 +3879,9 @@ declare type ReactFabricType = {
   ): Node | undefined
   getPublicInstanceFromInternalInstanceHandle(
     internalInstanceHandle: InternalInstanceHandle,
-  ): HostInstance | null | PublicTextInstance
-  getPublicInstanceFromRootTag(rootTag: number): null | PublicRootInstance
-  isChildPublicInstance(parent: HostInstance, child: HostInstance): boolean
+  ): HostInstance_2 | null | PublicTextInstance_2
+  getPublicInstanceFromRootTag(rootTag: number): null | PublicRootInstance_2
+  isChildPublicInstance(parent: HostInstance_2, child: HostInstance_2): boolean
   render(
     element: React.JSX.Element,
     containerTag: number,
@@ -3876,7 +3889,7 @@ declare type ReactFabricType = {
     concurrentRoot: boolean | undefined,
     options: RenderRootOptions | undefined,
   ): React.ComponentRef<React.ElementType> | undefined
-  sendAccessibilityEvent(handle: HostInstance, eventType: string): void
+  sendAccessibilityEvent(handle: HostInstance_2, eventType: string): void
   unmountComponentAtNode(containerTag: number): void
 }
 declare class ReactNativeDocument_default extends ReadOnlyNode_default {
@@ -5600,8 +5613,8 @@ declare class VirtualizedList_default extends StateSafePureComponent_default<
     prevState: State,
   ): State
   getScrollableNode(): null | number | undefined
-  getScrollRef(): null | React.ComponentRef<typeof ScrollView> | undefined
-  getScrollResponder(): null | ScrollResponderType | undefined
+  getScrollRef(): null | React.ComponentRef<typeof ScrollView_2> | undefined
+  getScrollResponder(): null | ScrollResponderType_2 | undefined
   hasMore(): boolean
   measureLayoutRelativeToContainingList(): void
   recordInteraction(): void
@@ -5693,6 +5706,14 @@ declare type WebPlatform = {
   get isTV(): boolean
   get Version(): string
 }
+declare class Window {
+  id: string
+  close(): Promise<void>
+  constructor(id: string)
+  open(props: null | Object | undefined): Promise<void>
+  update(props: null | Object | undefined): Promise<void>
+}
+declare type WindowManager = typeof WindowManager
 declare type WindowsPlatform = {
   OS: "windows"
   select: <T>(spec: PlatformSelectSpec<T>) => T

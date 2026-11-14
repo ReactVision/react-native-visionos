@@ -17,6 +17,8 @@ import type {BuildFlavor, Destination, Platform} from './types';
 const platforms /*: ReadonlyArray<Platform> */ = [
   'ios',
   'ios-simulator',
+  'visionos',
+  'visionos-simulator',
   'mac-catalyst',
 ];
 
@@ -25,6 +27,8 @@ const platforms /*: ReadonlyArray<Platform> */ = [
 const platformToDestination /*: Readonly<{|[Platform]: Destination|}> */ = {
   ios: 'iOS',
   'ios-simulator': 'iOS Simulator',
+  visionos: 'visionOS',
+  'visionos-simulator': 'visionOS Simulator',
   'mac-catalyst': 'macOS,variant=Mac Catalyst',
 };
 

@@ -37,11 +37,15 @@ def min_ios_version_supported
   return Helpers::Constants.min_ios_version_supported
 end
 
+def min_visionos_version_supported
+  return Helpers::Constants.min_visionos_version_supported
+end
+
 # This function returns the min supported OS versions supported by React Native
 # By using this function, you won't have to manually change your Podfile
 # when we change the minimum version supported by the framework.
 def min_supported_versions
-  return  { :ios => min_ios_version_supported }
+  return  { :ios => min_ios_version_supported, :visionos => min_visionos_version_supported }
 end
 
 # This function prepares the project for React Native, before processing
@@ -145,11 +149,17 @@ def use_react_native! (
 
   ReactNativePodsUtils.warn_if_not_on_arm64()
 
+  # The prebuilt Core and Dependencies artifacts are published by React Native, under the version
+  # this package is based on. This package releases patch versions of its own on top of that one,
+  # and nothing is published under those: asking Maven for one finds nothing, and the whole build
+  # quietly falls back to compiling React Native from source.
+  artifacts_version = NewArchitectureHelper.extract_react_native_upstream_version(react_native_path) || react_native_version
+
   # Update ReactNativeDependencies so that we can easily switch between source and prebuilt
-  ReactNativeDependenciesUtils.setup_react_native_dependencies(prefix, react_native_version)
+  ReactNativeDependenciesUtils.setup_react_native_dependencies(prefix, artifacts_version)
 
   # Update ReactNativeCoreUtils so that we can easily switch between source and prebuilt
-  ReactNativeCoreUtils.setup_rncore(prefix, react_native_version)
+  ReactNativeCoreUtils.setup_rncore(prefix, artifacts_version)
 
   # In prebuilt mode, generate the facade podspecs the core pods are installed as
   # (instead of their source podspecs) so they don't ship shadowing headers.
@@ -205,6 +215,10 @@ def use_react_native! (
   pod 'RCTSwiftUI', :path => "#{prefix}/ReactApple/RCTSwiftUI"
   pod 'RCTSwiftUIWrapper', :path => "#{prefix}/ReactApple/RCTSwiftUIWrapper"
   pod 'React-RCTAnimatedModuleProvider', :path => "#{prefix}/ReactApple/RCTAnimatedModuleProvider"
+  pod 'React-RCTSwiftExtensions', :path => "#{prefix}/Libraries/SwiftExtensions"
+  pod 'React-RCTFBReactNativeSpecVisionOS', :path => "#{prefix}/React", :modular_headers => true
+  pod 'React-RCTXR', :path => "#{prefix}/Libraries/XR"
+  pod 'React-RCTWindowManager', :path => "#{prefix}/Libraries/WindowManager", :modular_headers => true
 
   if hermes_enabled
     setup_hermes!(:react_native_path => prefix)

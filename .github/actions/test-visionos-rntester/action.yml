@@ -1,0 +1,76 @@
+name: test-visionos-rntester
+description: Build visionOS RNTester from source
+inputs:
+  ruby-version:
+    description: The version of ruby that must be used
+    default: 2.6.10
+  flavor:
+    description: The flavor of the build. Must be one of "Debug", "Release".
+    default: Debug
+  use-frameworks:
+    description: Whether we have to build with Dynamic Frameworks.
+    required: false
+    default: false
+
+runs:
+  using: composite
+  steps:
+    - name: Setup xcode
+      uses: ./.github/actions/setup-xcode
+    - name: Download the visionOS platform
+      shell: bash
+      run: |
+        # Runner images ship without the visionOS SDK.
+        # See https://github.com/actions/runner-images/issues/10559
+        sudo xcodebuild -runFirstLaunch
+        sudo xcodebuild -downloadPlatform visionOS
+        sudo xcodebuild -runFirstLaunch
+        xcodebuild -showsdks | grep -i visionos
+    - name: Setup node.js
+      uses: ./.github/actions/setup-node
+    - name: Run yarn
+      uses: ./.github/actions/yarn-install
+    - name: Setup ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ inputs.ruby-version }}
+    - name: Install CocoaPods dependencies
+      shell: bash
+      run: |
+        # visionOS always builds from source. Every prebuilt artifact React Native
+        # publishes - ReactNativeDependencies, ReactCore and the Hermes runtime
+        # tarball - ships ios, ios-simulator and mac-catalyst slices only, so
+        # there is nothing to download for xros. RCT_BUILD_HERMES_FROM_SOURCE
+        # makes hermes-engine.podspec build the tag pinned in
+        # packages/react-native/sdks/.hermesv1version instead.
+        export RCT_BUILD_HERMES_FROM_SOURCE=true
+
+        if [[ ${{ inputs.use-frameworks }} == "true" ]]; then
+          export USE_FRAMEWORKS=dynamic
+        fi
+
+        cd packages/rn-tester
+
+        bundle install
+        bundle exec pod install
+    - name: Build RNTester-visionOS
+      shell: bash
+      run: |
+        xcodebuild \
+          -scheme "RNTester-visionOS" \
+          -workspace packages/rn-tester/RNTesterPods.xcworkspace \
+          -configuration "${{ inputs.flavor }}" \
+          -sdk "xrsimulator" \
+          -destination "generic/platform=visionOS Simulator" \
+          -derivedDataPath "/tmp/RNTesterVisionOSBuild"
+
+          echo "Print path to *.app file"
+          APP_PATH=$(find "/tmp/RNTesterVisionOSBuild" -type d -name "*.app")
+
+          echo "App found at $APP_PATH"
+          echo "app-path=$APP_PATH" >> $GITHUB_ENV
+    - name: Upload RNTester-visionOS App
+      uses: actions/upload-artifact@v6
+      with:
+        name: RNTesterApp-visionOS-${{ inputs.flavor }}-${{ inputs.use-frameworks == 'true' && 'dynamic-frameworks' || 'static-libraries' }}
+        path: ${{ env.app-path }}
