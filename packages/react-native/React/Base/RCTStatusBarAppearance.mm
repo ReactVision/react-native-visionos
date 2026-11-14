@@ -48,6 +48,8 @@ static UIStatusBarAnimation sUpdateAnimation = UIStatusBarAnimationNone;
 
 + (void)updateStatusBarAnimated:(BOOL)animated
 {
+#if !TARGET_OS_VISION
+  // visionOS has no status bar: the style and visibility are recorded, and nothing is refreshed.
   UIViewController *viewController = RCTPresentedViewController();
   if (animated) {
     [UIView animateWithDuration:UINavigationControllerHideShowBarDuration
@@ -57,6 +59,7 @@ static UIStatusBarAnimation sUpdateAnimation = UIStatusBarAnimationNone;
   } else {
     [viewController setNeedsStatusBarAppearanceUpdate];
   }
+#endif
 }
 
 @end

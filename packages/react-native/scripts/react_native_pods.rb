@@ -115,10 +115,10 @@ def use_react_native! (
   # This is needed as part of our migration away from cocoapods
   ENV['RCT_SKIP_CODEGEN'] = ENV['RCT_SKIP_CODEGEN'] == '1' || ENV['RCT_IGNORE_PODS_DEPRECATION'] == '1' ? '1' : '0'
 
-  # Use the React Native precompiled binaries by default.
-  # Users can still turn them off and build from source by setting the environment variable to 0.
-  ENV['RCT_USE_RN_DEP'] = ENV['RCT_USE_RN_DEP'] == '0' ? '0' : '1'
-  ENV['RCT_USE_PREBUILT_RNCORE'] = ENV['RCT_USE_PREBUILT_RNCORE'] == '0' ? '0' : '1'
+  # Build React Native from source by default. Every prebuilt artifact React Native publishes
+  # ships ios, ios-simulator and mac-catalyst slices only, so there is nothing to download for visionOS.
+  ENV['RCT_USE_RN_DEP'] = ENV['RCT_USE_RN_DEP'] == '1' ? '1' : '0'
+  ENV['RCT_USE_PREBUILT_RNCORE'] = ENV['RCT_USE_PREBUILT_RNCORE'] == '1' ? '1' : '0'
   # Make `REMOVE_LEGACY_ARCH` enabled by default. This will build React Native
   # excluding the legacy arch unless the user turns this flag off explicitly.
   ENV['RCT_REMOVE_LEGACY_ARCH'] = ENV['RCT_REMOVE_LEGACY_ARCH'] == '0' ? '0' : '1'
