@@ -2,7 +2,12 @@
 #import <React/RCTConstants.h>
 #import <React/RCTUtils.h>
 #import <React/RCTRootView.h>
+// The pod's module is React_RCTAppDelegate when it is built as a framework.
+#if __has_include(<React_RCTAppDelegate/RCTAppDelegate.h>)
+#import <React_RCTAppDelegate/RCTAppDelegate.h>
+#else
 #import <React-RCTAppDelegate/RCTAppDelegate.h>
+#endif
 
 @protocol RCTRootViewFactoryProtocol <NSObject>
 

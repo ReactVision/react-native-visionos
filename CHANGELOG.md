@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.88.3 — 15 November 2026
+
+### Fixed
+
+- **iOS builds with `use_frameworks!` compile.** An app that installs this package *as* `react-native` and
+  builds React Native from source with frameworks (dynamic, as ARCore's pods require) failed in three
+  places, all in the visionOS additions, because a framework exposes its headers only under its own module
+  name:
+  - `React-RCTXR` and `React-RCTWindowManager` declared `React-RCTFBReactNativeSpecVisionOS` with
+    `s.dependency`, which adds no framework header path, so `FBReactNativeSpec_visionOS.h` was not
+    found. They use `add_dependency`, as React Native's own pods do for `React-RCTFBReactNativeSpec`.
+  - `RCTXRModule.mm` imports its Swift header as `<RCTXR/RCTXR-Swift.h>` when the pod is a framework,
+    and as `"RCTXR-Swift.h"` otherwise.
+  - `RCTReactViewController.m` (`React-RCTSwiftExtensions`) imports `<React_RCTAppDelegate/RCTAppDelegate.h>`
+    when that module exists, and its podspec now depends on `React-RCTAppDelegate`; it had reached the
+    header only through the shared header directory, which frameworks do not have.
+
 ## v0.88.2 — 15 November 2026
 
 ### Fixed

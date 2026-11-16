@@ -26,4 +26,7 @@ Pod::Spec.new do |s|
   s.dependency "React-Core"
   s.dependency "React-RCTXR" 
   s.dependency "React-RCTWindowManager" 
+  # RCTReactViewController.m imports RCTAppDelegate.h; it reached it only through the shared
+  # header directory, which use_frameworks does not have.
+  add_dependency(s, "React-RCTAppDelegate")
 end
