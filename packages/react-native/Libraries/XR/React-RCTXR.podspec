@@ -37,10 +37,12 @@ Pod::Spec.new do |s|
 
   s.dependency "RCTTypeSafety"
   s.dependency "React-jsi"
-  s.dependency "React-RCTFBReactNativeSpecVisionOS"
   s.dependency "React-Core/RCTXRHeaders"
 
   add_dependency(s, "ReactCodegen", :additional_framework_paths => ["build/generated/ios"])
+  # add_dependency, not s.dependency: with use_frameworks it also adds the spec's framework
+  # header path, without which FBReactNativeSpec_visionOS.h is not found.
+  add_dependency(s, "React-RCTFBReactNativeSpecVisionOS")
   add_dependency(s, "ReactCommon", :subspec => "turbomodule/core", :additional_framework_paths => ["react/nativemodule/core"])
   add_dependency(s, "React-NativeModulesApple", :additional_framework_paths => ["build/generated/ios"])
 

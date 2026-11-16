@@ -7,7 +7,12 @@
 #import <React/RCTBridge.h>
 #import <React/RCTConvert.h>
 #import <React/RCTUtils.h>
+// The Swift header lives in the module's framework when the pod is built as one.
+#if __has_include(<RCTXR/RCTXR-Swift.h>)
+#import <RCTXR/RCTXR-Swift.h>
+#else
 #import "RCTXR-Swift.h"
+#endif
 
 // Events
 static NSString *const RCTOpenImmersiveSpace = @"RCTOpenImmersiveSpace";
