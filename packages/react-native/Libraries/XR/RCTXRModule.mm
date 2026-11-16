@@ -1,4 +1,6 @@
-#import <React/RCTXRModule.h>
+// Its own header, not <React/...>: with the prebuilt React core (RCT_USE_PREBUILT_RNCORE=1) the
+// React framework is upstream's and does not carry the visionOS headers, so <React/...> fails.
+#import "RCTXRModule.h"
 
 #import <FBReactNativeSpec_visionOS/FBReactNativeSpec_visionOS.h>
 

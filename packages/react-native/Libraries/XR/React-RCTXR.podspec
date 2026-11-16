@@ -26,7 +26,7 @@ Pod::Spec.new do |s|
   s.platforms              = min_supported_versions
   s.compiler_flags         = '-Wno-nullability-completeness'
   s.source                 = source
-  s.source_files           = "*.{m,mm,swift}"
+  s.source_files           = "*.{h,m,mm,swift}"
   s.preserve_paths         = "package.json", "LICENSE", "LICENSE-docs"
   s.header_dir             = "RCTXR"
   s.pod_target_xcconfig    = {

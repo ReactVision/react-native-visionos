@@ -1,6 +1,6 @@
 {
   "name": "@reactvision/react-native-visionos",
-  "version": "0.88.1",
+  "version": "0.88.2",
   "publishConfig": {
     "access": "public"
   },
