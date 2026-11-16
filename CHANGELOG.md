@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.88.2 — unreleased
+
+### Fixed
+
+- **iOS builds with the prebuilt React core compile again.** An app that installs this package *as*
+  `react-native` and builds iOS with the prebuilt React core, which Expo SDK 58's Podfile turns on by
+  default (`RCT_USE_PREBUILT_RNCORE=1`), failed in `RCTWindowManager.mm`: `'React/RCTWindowManager.h'
+  file not found`. The prebuilt `React.xcframework` is upstream's and carries none of the visionOS
+  headers, while `React-RCTWindowManager` and `React-RCTXR` are installed on every platform. Both
+  modules now import their own header (`"RCTWindowManager.h"`, `"RCTXRModule.h"`), which their pods
+  ship, so they compile with the prebuilt core and from source alike. Installing the fork alongside
+  `react-native`, which the setup guide recommends, was not affected.
+
 ## v0.88.1 — 15 November 2026
 
 Moves the visionOS platform onto React Native 0.88.1, the version Expo SDK 58 uses. The fork is rebuilt on
