@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.88.1 — unreleased
+## v0.88.1 — 15 November 2026
 
 Moves the visionOS platform onto React Native 0.88.1, the version Expo SDK 58 uses. The fork is rebuilt on
 upstream's 0.88.1 tree, and the visionOS additions are carried over on top of it.
